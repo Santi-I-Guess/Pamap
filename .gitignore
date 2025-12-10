@@ -1,0 +1,4 @@
+pamap
+*.txt
+resources/*
+build/*.o
