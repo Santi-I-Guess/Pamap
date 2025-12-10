@@ -2,15 +2,18 @@
 #define GENERIC_ARRAY_H 1
 
 // very simple struct creator: init, free, and append func, with doubling resize
+// free, init, and append all take in the pointer to the generated array type
 
+// usage macros
 #define ARRAY_NAME(type) Array_##type
 #define FREE_FUNC(type,alpha) free_array_##type(alpha)
-#define INIT_FUNC(type,alpha) init_array_##type(alpha)
+#define INIT_FUNC(type,alpha,num_elements) init_array_##type(alpha,num_elements)
 #define APPEND_FUNC(type,alpha,beta) append_array_##type(alpha,beta)
 
+// header and source file macros
 #define DECLARE_FREE_FUNC(type) void free_array_##type(Array_##type *alpha);
-#define DECLARE_INIT_FUNC(type) bool init_array_##type(Array_##type *alpha);
-#define DECLARE_APPEND_FUNC(type) bool append_array_##type(Array_##type *alpha, type beta);
+#define DECLARE_INIT_FUNC(type) bool init_array_##type(Array_##type *alpha, unsigned num_elements);
+#define DECLARE_APPEND_FUNC(type) bool append_array_##type(Array_##type *alpha, const type beta);
 
 #define DEFINE_ARRAY_STRUCT(type) \
 typedef struct { \
@@ -29,8 +32,8 @@ void free_array_##type(Array_##type *alpha) { \
 }
 
 #define DEFINE_INIT_FUNC(type) \
-bool init_array_##type(Array_##type *alpha) { \
-        alpha->data = (type*)calloc(128, sizeof(type)); \
+bool init_array_##type(Array_##type *alpha, unsigned num_elements) { \
+        alpha->data = (type*)calloc(num_elements, sizeof(type)); \
         if (!alpha->data) \
                 return false; \
         alpha->capacity = 128; \
@@ -39,7 +42,7 @@ bool init_array_##type(Array_##type *alpha) { \
 }
 
 #define DEFINE_APPEND_FUNC(type) \
-bool append_array_##type(Array_##type *alpha, type beta) { \
+bool append_array_##type(Array_##type *alpha, const type beta) { \
         if (alpha->count == alpha->capacity) { \
                 size_t new_size = alpha->capacity * 2 * sizeof(type); \
                 type *tmp = (type*)realloc(alpha->data, new_size); \

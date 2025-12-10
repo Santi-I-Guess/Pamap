@@ -1,7 +1,7 @@
 #include <ctype.h>
 
-#include "generic_array.h"
-#include "types.h"
+#include "../generic_array.h"
+#include "../types.h"
 #include "tokenizer.h"
 
 // return debug info, if error occurs

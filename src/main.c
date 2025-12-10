@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "parser/tokenizer.h"
 #include "types.h"
-#include "tokenizer.h"
 
-// #define DEBUG
+#define DEBUG
 
 void store_input(FILE *source_file, Big_Str *source) {
         fseek(source_file, 0, SEEK_END);
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
         fclose(source_file);
 
         ARRAY_NAME(Token) token_array = {0};
-        if (!INIT_FUNC(Token,&token_array)) {
+        if (!INIT_FUNC(Token,&token_array, 128)) {
                 fprintf(stderr, "failed to init tarray\n");
                 free(source.data);
                 return 1;

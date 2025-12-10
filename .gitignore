@@ -1,4 +1,5 @@
 pamap
 *.txt
+*.bak
 resources/*
 build/*.o
