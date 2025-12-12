@@ -24,7 +24,7 @@ clean:
 	rm $(OBJ_FILES) $(TARGET) -f
 
 debug:
-	$(CC) -o $(TARGET) -DDEBUG $(SRC_FILES) $(CFLAGS)
+	$(CC) -o $(TARGET) -DDEBUG $(SRC_FILES) $(CFLAGS) $(LD_FLAGS)
 
 # also gets rid of weird ../ backtrack for deeper source files
 # is there a way to only have unique dependencies?

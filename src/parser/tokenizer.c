@@ -30,6 +30,7 @@ Debug_Info tokenize_buffer(Big_Str *source, ARRAY_NAME(Token) *token_array) {
         Debug_Info context = {.line_num = -1, .retval = GOOD, .data = ""};
         int line_num = 1;
 
+        bool macro_token = false; // capture token till newline if true
         size_t buff_idx = 0;
 next_token:
         while (buff_idx < source->length) {
@@ -109,11 +110,20 @@ next_token:
                 case '{': // edge start
                         ending_char = '}';
                         break;
+                case '#':
+                        ending_char = ' ';
+                        macro_token = true;
+                        break;
                 default:
-                        context.data[0] = curr;
-                        context.line_num = line_num;
-                        context.retval = UNKNOWN_SYMBOL;
-                        return context;
+                        if (!macro_token) {
+                                context.data[0] = curr;
+                                context.line_num = line_num;
+                                context.retval = UNKNOWN_SYMBOL;
+                                return context;
+                        } else {
+                                ending_char = '\n';
+                        }
+                        break;
                 }
 
                 // keep grabbing tokens until appropriate delimiter is hit
@@ -121,7 +131,8 @@ next_token:
                 Token curr_token = { .data = "", .line_num = line_num };
                 while (buff_idx + token_len < source->length) {
                         char curr = source->data[buff_idx + token_len];
-                        curr_token.data[token_len] = curr;
+                        if (curr != ending_char || !(curr == '\n' || curr == ' '))
+                                curr_token.data[token_len] = curr;
                         if (curr == ending_char)
                                 break;
                         token_len++;

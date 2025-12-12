@@ -51,7 +51,8 @@ int main(int argc, char **argv) {
                                 for (size_t i = 0; i < structure.edge_count; i++) {
                                         Coordinate first = structure.edges[i].first;
                                         Coordinate second = structure.edges[i].second;
-                                        draw_edge(first, second);
+                                        // intertrail color: BLACK
+                                        draw_edge(first, second, BLACK);
                                 }
                                 for (size_t i = 0; i < structure.trails.count; i++) {
                                         draw_trail(structure.trails.data[i]);

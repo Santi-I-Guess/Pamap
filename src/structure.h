@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "generic_array.h"
 #include "parser/tokenizer.h"
@@ -25,6 +26,8 @@ DECLARE_APPEND_FUNC(Coordinate)
 typedef struct {
         size_t count;
         Coordinate data[64];
+        uint8_t node_red, node_green, node_blue;
+        uint8_t edge_red, edge_green, edge_blue;
 } Trail;
 
 

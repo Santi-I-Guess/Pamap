@@ -35,6 +35,13 @@ char get_idx_char(const int idx) {
 
 bool alloc_trail_structure(Structure *alpha) {
         Trail curr_trail = {0};
+        // default colors: black nodes, gray edges
+        curr_trail.node_red   = 0x00;
+        curr_trail.node_green = 0x00;
+        curr_trail.node_blue  = 0x00;
+        curr_trail.edge_red   = 0xaa;
+        curr_trail.edge_green = 0xaa;
+        curr_trail.edge_blue  = 0xaa;
         return APPEND_FUNC(Trail, &(alpha->trails), curr_trail);
 }
 

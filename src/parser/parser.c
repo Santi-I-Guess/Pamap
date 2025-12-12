@@ -1,9 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../generic_array.h"
 #include "../structure.h"
 #include "parser.h"
+
+#ifdef DEBUG
+#include "../debug_funcs.h"
+#endif
 
 typedef enum {
         E_AWAIT_FIRST,
@@ -31,8 +36,11 @@ void generate_structure(Structure *structure, char **argv) {
         switch (context.retval) {
         case GOOD:
                 break;
-        case COORDINATE_MALFORM: // not used in tokenize_buffer
+        case COORDINATE_MALFORM:  // not used in tokenize_buffer
+        case EXPECTED_MACRO_ARG:  // not used in tokenize_buffer
+        case MACRO_ARG_MALFORM:   // not used in tokenize_buffer
         case TRAIL_BRACE_MALFORM: // not used in tokenize_buffer
+        case UNKNOWN_MACRO: // not used in tokenize_buffer
                 break;
         case MEMORY_ERROR:
                 printf("Error: memory error on line %d\n", context.line_num);
@@ -54,27 +62,44 @@ void generate_structure(Structure *structure, char **argv) {
         switch (populate_retval) {
         case GOOD:
                 break;
-        case UNKNOWN_SYMBOL: // not used in populate_structure
-                break;
         case COORDINATE_MALFORM:
                 printf("Error: coordinate malform in populate_structure\n");
                 FREE_FUNC(Trail, &(structure->trails));
                 exit(0);
-        case TRAIL_BRACE_MALFORM:
-                printf("Error: trail brace malform in populate_structure\n");
+        case EXPECTED_MACRO_ARG:
+                printf("Error: expected macro arg in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case MACRO_ARG_MALFORM:
+                printf("Error: macro arg malform in populate_structure\n");
                 FREE_FUNC(Trail, &(structure->trails));
                 exit(0);
         case MEMORY_ERROR:
                 printf("Error: memory error in populate_structure\n");
                 FREE_FUNC(Trail, &(structure->trails));
                 exit(0);
+        case TRAIL_BRACE_MALFORM:
+                printf("Error: trail brace malform in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case UNKNOWN_MACRO:
+                printf("Error: unknown macro in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case UNKNOWN_SYMBOL: // not used in populate_structure
+                break;
         }
+
+#ifdef DEBUG
+        print_tokens(token_array);
+#endif
+
         FREE_FUNC(Token, &token_array);
 }
 
 Retval populate_structure(
         Structure *structure,
-        const ARRAY_NAME(Token) *tokens
+        const ARRAY_NAME(Token) *token_array
 ) {
         bool edge_operate_next[52]    = {0};
         Coordinate edge_stacks[52][2] = {0};
@@ -83,8 +108,8 @@ Retval populate_structure(
 
         // the parser should be pretty lenient: I don't want a repeat of the
         // PAL assembler lexing and grammar checking
-        for (size_t i = 0; i < tokens->count; ++i) {
-                Token curr_token = tokens->data[i];
+        for (size_t token_idx = 0; token_idx < token_array->count; ++token_idx) {
+                Token curr_token = token_array->data[token_idx];
                 if (curr_token.data[0] == '[') {
                         // start a new trail
                         if (!alloc_trail_structure(structure))
@@ -123,10 +148,47 @@ Retval populate_structure(
                         memset(edge_operate_next, false, 52 * sizeof(bool));
                 } else if (curr_token.data[0] == '{') {
                         // set edges active
-                        for (size_t i = 0; i < strlen(curr_token.data); i++) {
+                        for (size_t i = 1; i < strlen(curr_token.data); i++) {
                                 int idx = get_edge_idx(curr_token.data[i]);
                                 if (idx != -1)
                                         edge_operate_next[idx] = true;
+                        }
+                } else if (curr_token.data[0] == '#') {
+                        // handle macro
+                        if (token_idx == token_array->count - 1)
+                                return EXPECTED_MACRO_ARG;
+                        if (strcmp(curr_token.data, "#node_color") == 0) {
+                                // set node color of current trail
+                                Token next_token = token_array->data[token_idx + 1];
+                                if (strlen(next_token.data) != 6)
+                                        return MACRO_ARG_MALFORM;
+                                // take in hex input without prefix
+                                char red[3] = "", green[3] = "", blue[3] = "";
+                                strncpy(red, next_token.data, 2);
+                                strncpy(green, next_token.data + 2, 2);
+                                strncpy(blue, next_token.data + 4, 2);
+                                Trail *curr_trail = &structure->trails.data[
+                                        structure->trails.count-1];
+                                curr_trail->node_red   = (uint8_t)strtol(red, NULL, 16);
+                                curr_trail->node_green = (uint8_t)strtol(green, NULL, 16);
+                                curr_trail->node_blue  = (uint8_t)strtol(blue, NULL, 16);
+                        } else if (strcmp(curr_token.data, "#edge_color") == 0) {
+                                // set edge color of current trail
+                                Token next_token = token_array->data[token_idx + 1];
+                                if (strlen(next_token.data) != 6)
+                                        return MACRO_ARG_MALFORM;
+                                // take in hex input without prefix
+                                char red[3] = "", green[3] = "", blue[3] = "";
+                                strncpy(red, next_token.data, 2);
+                                strncpy(green, next_token.data + 2, 2);
+                                strncpy(blue, next_token.data + 4, 2);
+                                Trail *curr_trail = &structure->trails.data[
+                                        structure->trails.count-1];
+                                curr_trail->edge_red   = (uint8_t)strtol(red, NULL, 16);
+                                curr_trail->edge_green = (uint8_t)strtol(green, NULL, 16);
+                                curr_trail->edge_blue  = (uint8_t)strtol(blue, NULL, 16);
+                        } else {
+                                return UNKNOWN_MACRO;
                         }
                 }
         }

@@ -2,7 +2,7 @@
 
 #include "structure.h"
 
-void draw_edge(Coordinate first, Coordinate second) {
+void draw_edge(Coordinate first, Coordinate second, Color color) {
         Vector3 first_vec = {
                 .x = (float)first.x,
                 .y = (float)first.y,
@@ -13,7 +13,7 @@ void draw_edge(Coordinate first, Coordinate second) {
                 .y = (float)second.y,
                 .z = (float)second.z
         };
-        DrawCylinderEx(first_vec, second_vec, 0.1f, 0.1f, 10, BLACK);
+        DrawCylinderEx(first_vec, second_vec, 0.1f, 0.1f, 10, color);
 }
 
 
@@ -29,9 +29,21 @@ void draw_trail(Trail trail) {
                         .y = (float)curr_coord.y,
                         .z = (float)curr_coord.z
                 };
-                DrawSphere(curr_vec, 1.0, PURPLE);
+                Color node_color = {
+                        trail.node_red,
+                        trail.node_green,
+                        trail.node_blue,
+                        255
+                };
+                Color edge_color = {
+                        trail.edge_red,
+                        trail.edge_green,
+                        trail.edge_blue,
+                        255
+                };
+                DrawSphere(curr_vec, 0.5, node_color);
                 if (i > 0)
-                        draw_edge(curr_coord, prev_coord);
+                        draw_edge(curr_coord, prev_coord, edge_color);
                 prev_coord = curr_coord;
         }
 }

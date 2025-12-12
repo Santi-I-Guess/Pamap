@@ -5,7 +5,7 @@
 
 #include "structure.h"
 
-void draw_edge(Coordinate first, Coordinate second);
+void draw_edge(Coordinate first, Coordinate second, Color color);
 void draw_trail(Trail trail);
 
 #endif

@@ -33,3 +33,13 @@ For example: \
 
 Single line comments can be marked with "//". This needs at least one space
 between tokens, if it's on the same line as other tokens
+
+## Macros
+Some macros are provided for customization and removing redundancy. Every
+macro is placed either inside or outside a trail, and it's argument is read
+to the newline. Subsequent macro calls in the same context simply overwrite
+each other, if applicable.
+- \#node_color xxxxxx: specify the node color all nodes in a given trail.
+    must be used inside a trail, must have 6 digit hex color without prefix
+- \#edge_color xxxxxx: specify the edge color all edges in a given trail.
+    must be used inside a trail, must have 6 digit hex color without prefix

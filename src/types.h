@@ -18,9 +18,12 @@ typedef struct {
 
 typedef enum {
         GOOD,
-        MEMORY_ERROR,
         COORDINATE_MALFORM,
+        EXPECTED_MACRO_ARG,
+        MACRO_ARG_MALFORM,
+        MEMORY_ERROR,
         TRAIL_BRACE_MALFORM,
+        UNKNOWN_MACRO,
         UNKNOWN_SYMBOL,
 } Retval;
 
