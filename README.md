@@ -5,6 +5,9 @@
   in videogames
 
 # Input File Syntax
+The input file has a syntax such that specifying a connection should be as
+easy and unprone to error as possible.
+
 A given file input file has each "trail" as a series of points inside square
 brackets. Consecutive points inside a given pathway will automatically be
 connectd with an edge.
@@ -12,10 +15,10 @@ connectd with an edge.
 To mark that two points on different trails have an edge with each other,
 put a set of curly braces in front with single letters that mark each
 connection. Uppercase and lowercase letters are considered seperate
-symbols for edges.
+symbols for edges. Each symbol is 1 uppercase or lowercase letter, allowing
+for 52 cross-trail edges.
 
-Each symbol is 1 uppercase or lowercase letter, allowing for 52 cross-trail
-edges.
+Single line comments can be marked starting with ";"
 
 For example: \
 \[  \

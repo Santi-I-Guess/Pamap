@@ -10,4 +10,6 @@ Retval populate_structure(
         const ARRAY_NAME(Token) *tokens
 );
 
+void generate_structure(Structure *structure, char **argv);
+
 #endif

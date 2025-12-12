@@ -43,10 +43,13 @@ depend:
 build/debug_funcs.o: src/debug_funcs.c src/debug_funcs.h src/generic_array.h \
  src/structure.h src/parser/tokenizer.h src/generic_array.h \
  src/types.h src/generic_array.h src/types.h
-build/main.o: src/main.c src/debug_funcs.h src/generic_array.h src/structure.h \
+build/graphics.o: src/graphics.c src/structure.h src/generic_array.h \
  src/parser/tokenizer.h src/generic_array.h \
- src/types.h src/generic_array.h src/types.h \
- src/parser/parser.h src/structure.h
+ src/types.h src/generic_array.h
+build/main.o: src/main.c src/graphics.h src/structure.h src/generic_array.h \
+ src/parser/tokenizer.h src/generic_array.h \
+ src/types.h src/generic_array.h src/parser/parser.h \
+ src/structure.h
 build/structure.o: src/structure.c src/structure.h src/generic_array.h \
  src/parser/tokenizer.h src/generic_array.h \
  src/types.h src/generic_array.h

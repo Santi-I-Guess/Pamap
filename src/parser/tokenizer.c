@@ -1,8 +1,29 @@
 #include <ctype.h>
+#include <stdio.h>
 
 #include "../generic_array.h"
 #include "../types.h"
 #include "tokenizer.h"
+
+void store_input(FILE *source_file, Big_Str *source) {
+        fseek(source_file, 0, SEEK_END);
+        long file_size = ftell(source_file);
+        fseek(source_file, 0, SEEK_SET);
+
+        source->data = (char*)calloc((size_t)(file_size + 4), sizeof(char));
+        if (!source->data) {
+                fprintf(stderr, "source->data failed to init");
+                exit(1);
+        }
+
+        while (!feof(source_file)) {
+                char curr = (char)fgetc(source_file);
+                if (isprint(curr) || isspace(curr)) {
+                        source->data[source->length] = curr;
+                        (source->length)++;
+                }
+        }
+}
 
 Debug_Info tokenize_buffer(Big_Str *source, ARRAY_NAME(Token) *token_array) {
         // debug info
@@ -10,6 +31,7 @@ Debug_Info tokenize_buffer(Big_Str *source, ARRAY_NAME(Token) *token_array) {
         int line_num = 1;
 
         size_t buff_idx = 0;
+next_token:
         while (buff_idx < source->length) {
                 // skip whitespace
                 while (buff_idx < source->length) {
@@ -25,6 +47,19 @@ Debug_Info tokenize_buffer(Big_Str *source, ARRAY_NAME(Token) *token_array) {
 
                 // trail borders don't consume inner contents
                 char curr = source->data[buff_idx];
+
+                // ignore comments to newline
+                if (curr == ';') {
+                        while (buff_idx < source->length) {
+                                curr = source->data[buff_idx];
+                                buff_idx++;
+                                if (curr == '\n') {
+                                        line_num++;
+                                        goto next_token;
+                                }
+                        }
+                }
+
                 Token temp_token = { .data = "", .line_num = line_num };
                 bool tarray_res = true;
                 switch (curr) {
