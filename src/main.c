@@ -3,11 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "debug_funcs.h"
+#include <raylib.h>
+
 #include "parser/parser.h"
 #include "parser/tokenizer.h"
 #include "structure.h"
 #include "types.h"
+
+#ifdef DEBUG
+#include "debug_funcs.h"
+#endif
 
 void store_input(FILE *source_file, Big_Str *source) {
         fseek(source_file, 0, SEEK_END);
@@ -29,17 +34,12 @@ void store_input(FILE *source_file, Big_Str *source) {
         }
 }
 
-int main(int argc, char **argv) {
-        if (argc != 2) {
-                printf("usage: pathways <input_file>\n");
-                return 0;
-        }
-
+void generate_structure(Structure *structure, char **argv) {
         // store file in string
         FILE *source_file = fopen(argv[1], "r");
         if (!source_file) {
                 fprintf(stderr, "failed to open file\n");
-                return 1;
+                exit(1);
         }
         Big_Str source = { 0 };
         store_input(source_file, &source);
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
         if (!INIT_FUNC(Token, &token_array, 128)) {
                 fprintf(stderr, "failed to init tarray\n");
                 free(source.data);
-                return 1;
+                exit(1);
         }
         Debug_Info context = tokenize_buffer(&source, &token_array);
         switch (context.retval) {
@@ -62,20 +62,19 @@ int main(int argc, char **argv) {
                 printf("Error: memory error on line %d\n", context.line_num);
                 free(source.data);
                 FREE_FUNC(Token, &token_array);
-                return 0;
+                exit(0);
         case UNKNOWN_SYMBOL:
                 printf("Error: unknown symbol \"%c\" on line %d\n", 
                        context.data[0], context.line_num);
                 free(source.data);
                 FREE_FUNC(Token, &token_array);
-                return 0;
+                exit(0);
         }
         free(source.data);
 
         // store into structure
-        Structure structure = {0};
-        init_structure(&structure);
-        Retval populate_retval = populate_structure(&structure, &token_array);
+        init_structure(structure);
+        Retval populate_retval = populate_structure(structure, &token_array);
         switch (populate_retval) {
         case GOOD:
                 break;
@@ -83,24 +82,72 @@ int main(int argc, char **argv) {
                 break;
         case COORDINATE_MALFORM:
                 printf("Error: coordinate malform in populate_structure\n");
-                FREE_FUNC(Trail, &(structure.trails));
-                return 0;
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
         case TRAIL_BRACE_MALFORM:
                 printf("Error: trail brace malform in populate_structure\n");
-                FREE_FUNC(Trail, &(structure.trails));
-                return 0;
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
         case MEMORY_ERROR:
                 printf("Error: memory error in populate_structure\n");
-                FREE_FUNC(Trail, &(structure.trails));
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        }
+        FREE_FUNC(Token, &token_array);
+}
+
+int main(int argc, char **argv) {
+        if (argc != 2) {
+                printf("usage: pathways <input_file>\n");
                 return 0;
         }
 
-        // run main program
-        // print_tokens(token_array);
-        print_structure(&structure);
+        // tokenize, parse, and populate data into structure
+        Structure structure = {0};
+        generate_structure(&structure, argv);
 
-        FREE_FUNC(Token, &token_array);
+#ifdef DEBUG
+        print_structure(&structure);
+#endif
+
+        const int width = 800;
+        const int height = 450;
+        InitWindow(width, height, "pathways mapper");
+        SetTargetFPS(60);
+        Camera3D camera   = { 0 };
+        camera.position   = (Vector3){ 10.0f, 10.0f, 10.0f }; // Camera position
+        camera.target     = (Vector3){ 0.0f, 0.0f, 0.0f };    // Camera looking at point
+        camera.up         = (Vector3){ 0.0f, 1.0f, 0.0f };    // Camera up vector (rotation towards target)
+        camera.fovy       = 45.0f;                            // Camera field-of-view Y
+        camera.projection = CAMERA_PERSPECTIVE;               // Camera projection type
+        Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
+        DisableCursor();
+
+        while (!WindowShouldClose())        // Detect window close button or ESC key
+        {
+                UpdateCamera(&camera, CAMERA_FREE);
+
+                if (IsKeyPressed(KEY_Z))
+                        camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
+
+                BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                                BeginMode3D(camera);
+                                DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
+                                DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
+                                DrawGrid(10, 1.0f);
+                                EndMode3D();
+                        DrawRectangle( 10, 10, 320, 93, Fade(SKYBLUE, 0.5f));
+                        DrawRectangleLines( 10, 10, 320, 93, BLUE);
+                        DrawText("Free camera default controls:", 20, 20, 10, BLACK);
+                        DrawText("- Mouse Wheel to Zoom in-out", 40, 40, 10, DARKGRAY);
+                        DrawText("- Mouse Wheel Pressed to Pan", 40, 60, 10, DARKGRAY);
+                        DrawText("- Z to zoom to (0, 0, 0)", 40, 80, 10, DARKGRAY);
+                EndDrawing();
+        }
+
+        CloseWindow();
+
         free_structure(&structure);
-        source.length = 0;
         return 0;
 }

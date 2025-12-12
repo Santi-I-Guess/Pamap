@@ -6,7 +6,7 @@ OBJ_FILES = $(patsubst %.c, build/%.o, $(notdir ${SRC_FILES}))
 
 CC = gcc
 CC_FLAGS = -g -Wall -Wconversion -Wextra -Wpedantic
-LD_FLAGS = -g
+LD_FLAGS = -g -lraylib
 
 all: $(TARGET)
 
