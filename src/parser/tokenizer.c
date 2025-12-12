@@ -4,7 +4,6 @@
 #include "../types.h"
 #include "tokenizer.h"
 
-// return debug info, if error occurs
 Debug_Info tokenize_buffer(Big_Str *source, ARRAY_NAME(Token) *token_array) {
         // debug info
         Debug_Info context = {.line_num = -1, .retval = GOOD, .data = ""};
@@ -26,18 +25,17 @@ Debug_Info tokenize_buffer(Big_Str *source, ARRAY_NAME(Token) *token_array) {
 
                 // trail borders don't consume inner contents
                 char curr = source->data[buff_idx];
-                Token temp_token;
-                temp_token.line_num = line_num;
+                Token temp_token = { .data = "", .line_num = line_num };
                 bool tarray_res = true;
                 switch (curr) {
                 case '[': // trail start
                         temp_token.data[0] = '[';
-                        tarray_res = APPEND_FUNC(Token,token_array,temp_token);
+                        tarray_res = APPEND_FUNC(Token, token_array, temp_token);
                         buff_idx++;
                         continue; // next token
                 case ']':
                         temp_token.data[0] = ']';
-                        tarray_res = APPEND_FUNC(Token,token_array,temp_token);
+                        tarray_res = APPEND_FUNC(Token, token_array, temp_token);
                         buff_idx++;
                         continue; // next token
                 case ',':
@@ -79,7 +77,7 @@ Debug_Info tokenize_buffer(Big_Str *source, ARRAY_NAME(Token) *token_array) {
                                 break;
                         token_len++;
                 }
-                tarray_res = APPEND_FUNC(Token,token_array,curr_token);
+                tarray_res = APPEND_FUNC(Token, token_array, curr_token);
                 if (!tarray_res) {
                         context.line_num = line_num;
                         context.retval = MEMORY_ERROR;

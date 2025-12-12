@@ -19,7 +19,9 @@ typedef struct {
 typedef enum {
         GOOD,
         MEMORY_ERROR,
-        UNKNOWN_SYMBOL
+        COORDINATE_MALFORM,
+        TRAIL_BRACE_MALFORM,
+        UNKNOWN_SYMBOL,
 } Retval;
 
 DEFINE_ARRAY_STRUCT(Token)
