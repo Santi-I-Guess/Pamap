@@ -26,6 +26,7 @@ void print_structure(Structure *alpha) {
                         printf("-> (%d, %d, %d)\n", curr_coord.x, curr_coord.y, curr_coord.z);
                 }
         }
+        printf("Start pos: (%d, %d, %d)\n", alpha->start_x, alpha->start_y, alpha->start_z);
 }
 
 void print_tokens(ARRAY_NAME(Token) token_array)  {

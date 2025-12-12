@@ -155,9 +155,9 @@ Retval populate_structure(
                         }
                 } else if (curr_token.data[0] == '#') {
                         // handle macro
-                        if (token_idx == token_array->count - 1)
+                        if (token_idx == token_array->count - 1) {
                                 return EXPECTED_MACRO_ARG;
-                        if (strcmp(curr_token.data, "#node_color") == 0) {
+                        } else if (strcmp(curr_token.data, "#node_color") == 0) {
                                 // set node color of current trail
                                 Token next_token = token_array->data[token_idx + 1];
                                 if (strlen(next_token.data) != 6)
@@ -187,6 +187,15 @@ Retval populate_structure(
                                 curr_trail->edge_red   = (uint8_t)strtol(red, NULL, 16);
                                 curr_trail->edge_green = (uint8_t)strtol(green, NULL, 16);
                                 curr_trail->edge_blue  = (uint8_t)strtol(blue, NULL, 16);
+                        } else if (strcmp(curr_token.data, "#start_pos") == 0) {
+                                Token next_token = token_array->data[token_idx + 1];
+                                int x, y, z;
+                                if (sscanf(next_token.data, "%d,%d,%d", &x, &y, &z) < 3) {
+                                        return MACRO_ARG_MALFORM;
+                                }
+                                structure->start_x = x;
+                                structure->start_y = y;
+                                structure->start_z = z;
                         } else {
                                 return UNKNOWN_MACRO;
                         }
