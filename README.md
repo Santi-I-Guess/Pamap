@@ -1,8 +1,13 @@
-
 # 3D Pathway Visualizer
 * Yep, it's that simple
 * Basically just to help map out tunnels, caves, and other semi-complex areas
   in videogames
+
+# Building
+Running should be as simple as running `make`. The depend rule in the Makefile 
+assumes you GNU `sed`, available at  https://www.gnu.org/software/sed/. The 
+graphics interface is ran with raylib, which is available at 
+https://www.raylib.com/
 
 # Input File Syntax
 The input file has a syntax such that specifying a connection should be as
@@ -18,8 +23,6 @@ connection. Uppercase and lowercase letters are considered seperate
 symbols for edges. Each symbol is 1 uppercase or lowercase letter, allowing
 for 52 cross-trail edges.
 
-Single line comments can be marked starting with ";"
-
 For example: \
 \[  \
 &emsp;(0,0,0), (1,2,0), {A}(3,3,0), (5,5,0), {B}(6,8,0) \
@@ -27,3 +30,6 @@ For example: \
 \[ \
 &emsp;(0,3,0), (1,7,0), (2,7,0), {A,B}(3,5,0) \
 \]
+
+Single line comments can be marked with "//". This needs at least one space
+between tokens, if it's on the same line as other tokens

@@ -48,8 +48,20 @@ next_token:
                 // trail borders don't consume inner contents
                 char curr = source->data[buff_idx];
 
-                // ignore comments to newline
-                if (curr == ';') {
+                // ignore comments (//) to newline
+                if (curr == '/') {
+                        if (buff_idx == source->length - 1) {
+                                context.data[0] = curr;
+                                context.line_num = line_num;
+                                context.retval = UNKNOWN_SYMBOL;
+                                return context;
+                        }
+                        if (source->data[buff_idx + 1] != '/') {
+                                context.data[0] = source->data[buff_idx + 1];
+                                context.line_num = line_num;
+                                context.retval = UNKNOWN_SYMBOL;
+                                return context;
+                        }
                         while (buff_idx < source->length) {
                                 curr = source->data[buff_idx];
                                 buff_idx++;
@@ -66,6 +78,8 @@ next_token:
                 case '[': // trail start
                         temp_token.data[0] = '[';
                         tarray_res = APPEND_FUNC(Token, token_array, temp_token);
+                        if (!tarray_res) {
+                        }
                         buff_idx++;
                         continue; // next token
                 case ']':
@@ -96,9 +110,9 @@ next_token:
                         ending_char = '}';
                         break;
                 default:
+                        context.data[0] = curr;
                         context.line_num = line_num;
                         context.retval = UNKNOWN_SYMBOL;
-                        context.data[0] = curr;
                         return context;
                 }
 
