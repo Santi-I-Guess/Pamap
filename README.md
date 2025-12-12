@@ -39,12 +39,12 @@ Some macros are provided for customization and removing redundancy. Every
 macro is placed either inside or outside a trail, and it's argument is read
 to the newline. Subsequent macro calls in the same context simply overwrite
 each other, if applicable. %d refers to an integer.
-- \#start_pos %d,%d,%d: specifiy the position to put the camera at the
+- `#start_pos %d,%d,%d`: specifiy the position to put the camera at the
     beginning of the program / the next file reload. May be placed outside
     or inside trail backets.
-- \#teleport_pos %d,%d,%d: specify the position to teleport the camera when
+- `#teleport_pos %d,%d,%d`: specify the position to teleport the camera when
     V is pressed. May be placed outside or inside trail backets.
-- \#node_color xxxxxx: specify the node color all nodes in a given trail.
+- `#node_color xxxxxx`: specify the node color all nodes in a given trail.
     must be used inside a trail, must have 6 digit hex color without prefix
-- \#edge_color xxxxxx: specify the edge color all edges in a given trail.
+- `#edge_color xxxxxx`: specify the edge color all edges in a given trail.
     must be used inside a trail, must have 6 digit hex color without prefix

@@ -24,8 +24,8 @@ int main(int argc, char **argv) {
         print_structure(&structure);
 #endif
 
-        const int width = 800;
-        const int height = 450;
+        const int width = 1000;
+        const int height = 600;
         InitWindow(width, height, "Pathways Mapper");
         SetTargetFPS(60);
         Camera3D camera   = { 0 };
@@ -42,12 +42,11 @@ int main(int argc, char **argv) {
         camera.fovy       = 45.0f;
         // Camera projection type
         camera.projection = CAMERA_PERSPECTIVE;
-        Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 
         DisableCursor();
         bool mouse_toggled_off = true;
-        while (!WindowShouldClose())        // Detect window close button or ESC key
-        {
+        SetExitKey(KEY_NULL);
+        while (!WindowShouldClose()) {
                 UpdateCamera(&camera, CAMERA_FREE);
 
                 if (IsKeyPressed(KEY_Q)) {
@@ -78,6 +77,10 @@ int main(int argc, char **argv) {
                 sprintf(teleport_buffer, "- V to teleport to (%d, %d, %d)",
                         structure.tele_x, structure.tele_y, structure.tele_z);
 
+                char position_buffer[64];
+                sprintf(position_buffer, "Current pos: (%.0f, %.0f, %.0f)",
+                        camera.position.x, camera.position.y, camera.position.z);
+
                 BeginDrawing();
                         ClearBackground(RAYWHITE);
                                 BeginMode3D(camera);
@@ -91,11 +94,10 @@ int main(int argc, char **argv) {
                                 for (size_t i = 0; i < structure.trails.count; i++) {
                                         draw_trail(structure.trails.data[i]);
                                 }
-
-                                DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
-                                DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
                                 DrawGrid(10, 1.0f);
                                 EndMode3D();
+
+                        // draw controls
                         DrawRectangle( 10, 10, 300, 150, Fade(SKYBLUE, 0.5f));
                         DrawRectangleLines( 10, 10, 300, 150, BLUE);
                         DrawText("Free camera default controls:", 20,  20, 10, BLACK);
@@ -105,6 +107,11 @@ int main(int argc, char **argv) {
                         DrawText("- R to reload the file"  ,      40, 100, 10, DARKGRAY);
                         DrawText(teleport_buffer,                 40, 120, 10, DARKGRAY);
                         DrawText("- Z to zoom to (0, 0, 0)",      40, 140, 10, DARKGRAY);
+
+                        // draw camera position
+                        DrawRectangle( 820, 10, 160, 30, Fade(RED, 0.5f));
+                        DrawRectangleLines( 820, 10, 160, 30, BLUE);
+                        DrawText(position_buffer, 830, 20, 10, DARKGRAY);
                 EndDrawing();
         }
 
