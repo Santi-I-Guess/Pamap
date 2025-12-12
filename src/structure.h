@@ -41,6 +41,7 @@ typedef struct {
         size_t edge_count;
         Edge edges[52];
         int start_x, start_y, start_z;
+        int tele_x, tele_y, tele_z;
 } Structure;
 
 bool init_structure(Structure *alpha);

@@ -12,6 +12,9 @@ bool init_structure(Structure *alpha) {
         alpha->start_x = 10;
         alpha->start_y = 10;
         alpha->start_z = 10;
+        alpha->tele_x = 10;
+        alpha->tele_y = 10;
+        alpha->tele_z = 10;
         return INIT_FUNC(Trail, &alpha->trails, 8);
 }
 

@@ -196,6 +196,16 @@ Retval populate_structure(
                                 structure->start_x = x;
                                 structure->start_y = y;
                                 structure->start_z = z;
+                        } else if (strcmp(curr_token.data, "#teleport_pos") == 0) {
+                                Token next_token = token_array->data[token_idx + 1];
+                                int x, y, z;
+                                if (sscanf(next_token.data, "%d,%d,%d", &x, &y, &z) < 3) {
+                                        return MACRO_ARG_MALFORM;
+                                }
+                                structure->tele_x = x;
+                                structure->tele_y = y;
+                                structure->tele_z = z;
+
                         } else {
                                 return UNKNOWN_MACRO;
                         }
