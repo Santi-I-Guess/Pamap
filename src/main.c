@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
         Settings settings = {
                 .is_mouse_disabled = true,
-                .move_speed = 1.0f,
+                .move_speed = .5f,
                 .movement = {0},
                 .rotation = {0},
         };
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 
                 EndMode3D();
                 // controls box and position / angle box
-                draw_info_boxes(&camera, &structure);
+                draw_info_boxes(&camera, &structure, &settings);
                 EndDrawing();
         }
 

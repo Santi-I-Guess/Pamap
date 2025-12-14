@@ -79,15 +79,23 @@ void handle_controls(Camera3D *camera, Settings *settings) {
 
         // handle elevation controls
         if (IsKeyDown(KEY_SPACE)) {
-                camera->position.y += settings->move_speed / 5.0f;
-                camera->target.y   += settings->move_speed / 5.0f;
+                camera->position.y += settings->move_speed;
+                camera->target.y   += settings->move_speed;
         } else if (IsKeyDown(KEY_LEFT_SHIFT)) {
-                camera->position.y -= settings->move_speed / 5.0f;
-                camera->target.y   -= settings->move_speed / 5.0f;
+                camera->position.y -= settings->move_speed;
+                camera->target.y   -= settings->move_speed;
         }
 
         // handle camera rotation
+        // normalize mouse vector
         Vector2 mouse_deltas = GetMouseDelta();
+        // float md_mag = sqrtf(
+        //        (mouse_deltas.x * mouse_deltas.x)
+        //        + (mouse_deltas.y * mouse_deltas.y)
+        // );
+        // mouse_deltas.x /= md_mag;
+        // mouse_deltas.y /= md_mag;
+
         if (fabs(mouse_deltas.x) > 0.1f) {
                 float new_angle = theta + (0.01f * mouse_deltas.x);
                 float change_x = radius_xz * cosf(new_angle);
@@ -104,9 +112,50 @@ void handle_controls(Camera3D *camera, Settings *settings) {
                 camera->target.y = change_y + camera->position.y;
                 camera->target.z = change_z + camera->position.z;
         }
+
+        // handle lateral translation
+        if (IsKeyDown(KEY_A)) {
+                // left
+                float new_angle = theta + PI/2.0f;
+                float base_change_x = -settings->move_speed * cosf(new_angle);
+                float base_change_z = -settings->move_speed * sinf(new_angle);
+                camera->position.x += base_change_x;
+                camera->position.z += base_change_z;
+                camera->target.x += base_change_x;
+                camera->target.z += base_change_z;
+        } else if (IsKeyDown(KEY_D)) {
+                // right
+                float new_angle = theta + PI/2.0f;
+                float base_change_x = settings->move_speed * cosf(new_angle);
+                float base_change_z = settings->move_speed * sinf(new_angle);
+                camera->position.x += base_change_x;
+                camera->position.z += base_change_z;
+                camera->target.x += base_change_x;
+                camera->target.z += base_change_z;
+        } else if (IsKeyDown(KEY_W)) {
+                // forwards
+                float base_change_x = settings->move_speed * cosf(theta);
+                float base_change_z = settings->move_speed * sinf(theta);
+                camera->position.x += base_change_x;
+                camera->position.z += base_change_z;
+                camera->target.x += base_change_x;
+                camera->target.z += base_change_z;
+        } else if (IsKeyDown(KEY_S)) {
+                // backwards
+                float base_change_x = -settings->move_speed * cosf(theta);
+                float base_change_z = -settings->move_speed * sinf(theta);
+                camera->position.x += base_change_x;
+                camera->position.z += base_change_z;
+                camera->target.x += base_change_x;
+                camera->target.z += base_change_z;
+        }
 }
 
-void draw_info_boxes(Camera3D *camera, Structure *structure) {
+void draw_info_boxes(
+        Camera3D *camera,
+        Structure *structure,
+        Settings *settings
+) {
         char teleport_buffer[64];
         char position_buffer[64];
         char target_buffer[64];
@@ -141,11 +190,13 @@ void draw_info_boxes(Camera3D *camera, Structure *structure) {
         char phi_buffer[64];
         char radius_buffer[64];
         char xz_radius_buffer[64];
+        char move_speed_buffer[64];
 
-        sprintf(theta_buffer,    "Current theta: %.1f r", theta);
-        sprintf(phi_buffer,      "Current phi: %.1f r", phi);
-        sprintf(radius_buffer,   "Current radius: %.1f", radius);
-        sprintf(xz_radius_buffer,"Current xz-rad: %.1f", radius_xz);
+        sprintf(theta_buffer,      "Current theta: %.1f r", theta);
+        sprintf(phi_buffer,        "Current phi: %.1f r", phi);
+        sprintf(radius_buffer,     "Current radius: %.1f", radius);
+        sprintf(xz_radius_buffer,  "Current xz-rad: %.1f", radius_xz);
+        sprintf(move_speed_buffer, "Current speed: %.2f", settings->move_speed);
 
         // draw controls
         DrawRectangle( 10, 10, 300, 150, Fade(SKYBLUE, 0.5f));
@@ -164,14 +215,15 @@ void draw_info_boxes(Camera3D *camera, Structure *structure) {
         DrawRectangleLines(       820, 10, 160, 30, BLUE);
         DrawText(position_buffer, 830, 20,  10, DARKGRAY);
 #else
-        DrawRectangle(             820, 10, 160, 130, Fade(RED, 0.5f));
-        DrawRectangleLines(        820, 10, 160, 130, BLUE);
-        DrawText(position_buffer,  830, 20,  10, DARKGRAY);
-        DrawText(target_buffer,    830, 40,  10, DARKGRAY);
-        DrawText(theta_buffer,     830, 60,  10, DARKGRAY);
-        DrawText(phi_buffer,       830, 80,  10, DARKGRAY);
-        DrawText(radius_buffer,    830, 100, 10, DARKGRAY);
-        DrawText(xz_radius_buffer, 830, 120, 10, DARKGRAY);
+        DrawRectangle(              820, 10, 160, 150, Fade(RED, 0.5f));
+        DrawRectangleLines(         820, 10, 160, 150, BLUE);
+        DrawText(position_buffer,   830, 20,  10, DARKGRAY);
+        DrawText(target_buffer,     830, 40,  10, DARKGRAY);
+        DrawText(theta_buffer,      830, 60,  10, DARKGRAY);
+        DrawText(phi_buffer,        830, 80,  10, DARKGRAY);
+        DrawText(radius_buffer,     830, 100, 10, DARKGRAY);
+        DrawText(xz_radius_buffer,  830, 120, 10, DARKGRAY);
+        DrawText(move_speed_buffer, 830, 140, 10, DARKGRAY);
 
 #endif
 }

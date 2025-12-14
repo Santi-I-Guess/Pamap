@@ -19,6 +19,10 @@ void draw_trail(Trail trail);
 void handle_controls(Camera3D *camera, Settings *settings);
 
 // draw controls box and postion / angle box
-void draw_info_boxes(Camera3D *camera, Structure *structure);
+void draw_info_boxes(
+        Camera3D *camera,
+        Structure *structure,
+        Settings *settings
+);
 
 #endif
