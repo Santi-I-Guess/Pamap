@@ -30,7 +30,6 @@ typedef struct {
         uint8_t edge_red, edge_green, edge_blue;
 } Trail;
 
-
 DEFINE_ARRAY_STRUCT(Trail)
 DECLARE_FREE_FUNC(Trail)
 DECLARE_INIT_FUNC(Trail)

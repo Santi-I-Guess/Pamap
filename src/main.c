@@ -10,6 +10,8 @@
 #include "debug_funcs.h"
 #endif
 
+void generate_structure(Structure *structure, char **argv);
+
 int main(int argc, char **argv) {
         if (argc != 2) {
                 printf("usage: pathways <input_file>\n");
@@ -19,10 +21,6 @@ int main(int argc, char **argv) {
         // tokenize, parse, and populate data into structure
         Structure structure = {0};
         generate_structure(&structure, argv);
-
-#ifdef DEBUG
-        print_structure(&structure);
-#endif
 
         const int width = 1000;
         const int height = 600;
@@ -34,27 +32,31 @@ int main(int argc, char **argv) {
                 (float)structure.start_y,
                 (float)structure.start_z,
         };
-        // Camera looking at point
         camera.target     = (Vector3){ 0.0f, 0.0f, 0.0f };
-        // Camera up vector (rotation towards target)
         camera.up         = (Vector3){ 0.0f, 1.0f, 0.0f };
-        // Camera field-of-view Y
         camera.fovy       = 45.0f;
-        // Camera projection type
         camera.projection = CAMERA_PERSPECTIVE;
 
-        DisableCursor();
-        bool mouse_toggled_off = true;
-        SetExitKey(KEY_NULL);
-        while (!WindowShouldClose()) {
-                UpdateCamera(&camera, CAMERA_FREE);
+        Settings settings = {
+                .is_mouse_disabled = true,
+                .move_speed = 1.0f,
+                .movement = {0},
+                .rotation = {0},
+        };
 
+        DisableCursor();
+        SetExitKey(KEY_NULL);
+
+        while (!WindowShouldClose()) {
+                UpdateCamera(&camera, CAMERA_CUSTOM);
+
+                handle_controls(&camera, &settings);
                 if (IsKeyPressed(KEY_Q)) {
-                        if (mouse_toggled_off)
+                        if (settings.is_mouse_disabled)
                                 DisableCursor();
                         else
                                 EnableCursor();
-                        mouse_toggled_off ^= true;
+                        settings.is_mouse_disabled ^= true;
                 } else if (IsKeyPressed(KEY_R)) {
                         free_structure(&structure);
                         generate_structure(&structure, argv);
@@ -70,48 +72,38 @@ int main(int argc, char **argv) {
                                 (float)structure.tele_z,
                         };
                 } else if (IsKeyPressed(KEY_Z)) {
+                        // i need to set target in the direction of the
+                        //      origin without changing the radius
                         camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
                 }
 
-                char teleport_buffer[64];
-                sprintf(teleport_buffer, "- V to teleport to (%d, %d, %d)",
-                        structure.tele_x, structure.tele_y, structure.tele_z);
-
-                char position_buffer[64];
-                sprintf(position_buffer, "Current pos: (%.0f, %.0f, %.0f)",
-                        camera.position.x, camera.position.y, camera.position.z);
-
                 BeginDrawing();
-                        ClearBackground(RAYWHITE);
-                                BeginMode3D(camera);
+                ClearBackground(RAYWHITE);
+                BeginMode3D(camera);
 
-                                for (size_t i = 0; i < structure.edge_count; i++) {
-                                        Coordinate first = structure.edges[i].first;
-                                        Coordinate second = structure.edges[i].second;
-                                        // intertrail color: BLACK
-                                        draw_edge(first, second, BLACK);
-                                }
-                                for (size_t i = 0; i < structure.trails.count; i++) {
-                                        draw_trail(structure.trails.data[i]);
-                                }
-                                DrawGrid(10, 1.0f);
-                                EndMode3D();
+                for (size_t i = 0; i < structure.edge_count; i++) {
+                        Coordinate first = structure.edges[i].first;
+                        Coordinate second = structure.edges[i].second;
+                        // intertrail color: BLACK
+                        draw_edge(first, second, BLACK);
+                }
+                for (size_t i = 0; i < structure.trails.count; i++) {
+                        draw_trail(structure.trails.data[i]);
+                }
+                DrawGrid(10, 1.0f);
 
-                        // draw controls
-                        DrawRectangle( 10, 10, 300, 150, Fade(SKYBLUE, 0.5f));
-                        DrawRectangleLines( 10, 10, 300, 150, BLUE);
-                        DrawText("Free camera default controls:", 20,  20, 10, BLACK);
-                        DrawText("- Mouse Wheel to Zoom in-out",  40,  40, 10, DARKGRAY);
-                        DrawText("- Mouse Wheel Pressed to Pan",  40,  60, 10, DARKGRAY);
-                        DrawText("- Q to toggle the cursor",      40,  80, 10, DARKGRAY);
-                        DrawText("- R to reload the file"  ,      40, 100, 10, DARKGRAY);
-                        DrawText(teleport_buffer,                 40, 120, 10, DARKGRAY);
-                        DrawText("- Z to zoom to (0, 0, 0)",      40, 140, 10, DARKGRAY);
+#ifdef DEBUG
+                Vector3 tar_pos = {
+                        .x = camera.target.x,
+                        .y = camera.target.y,
+                        .z = camera.target.z
+                };
+                DrawSphere(tar_pos, 0.25, RED);
+#endif
 
-                        // draw camera position
-                        DrawRectangle( 820, 10, 160, 30, Fade(RED, 0.5f));
-                        DrawRectangleLines( 820, 10, 160, 30, BLUE);
-                        DrawText(position_buffer, 830, 20, 10, DARKGRAY);
+                EndMode3D();
+                // controls box and position / angle box
+                draw_info_boxes(&camera, &structure);
                 EndDrawing();
         }
 
@@ -119,4 +111,86 @@ int main(int argc, char **argv) {
 
         free_structure(&structure);
         return 0;
+}
+
+void generate_structure(Structure *structure, char **argv) {
+        // store file in string
+        FILE *source_file = fopen(argv[1], "r");
+        if (!source_file) {
+                fprintf(stderr, "failed to open file\n");
+                exit(1);
+        }
+        Big_Str source = { 0 };
+        store_input(source_file, &source);
+        fclose(source_file);
+
+        ARRAY_NAME(Token) token_array = {0};
+        if (!INIT_FUNC(Token, &token_array, 128)) {
+                fprintf(stderr, "failed to init tarray\n");
+                free(source.data);
+                exit(1);
+        }
+        Debug_Info context = tokenize_buffer(&source, &token_array);
+        switch (context.retval) {
+        case GOOD:
+                break;
+        case COORDINATE_MALFORM:  // not used in tokenize_buffer
+        case EXPECTED_MACRO_ARG:  // not used in tokenize_buffer
+        case MACRO_ARG_MALFORM:   // not used in tokenize_buffer
+        case TRAIL_BRACE_MALFORM: // not used in tokenize_buffer
+        case UNKNOWN_MACRO: // not used in tokenize_buffer
+                break;
+        case MEMORY_ERROR:
+                printf("Error: memory error on line %d\n", context.line_num);
+                free(source.data);
+                FREE_FUNC(Token, &token_array);
+                exit(0);
+        case UNKNOWN_SYMBOL:
+                printf("Error: unknown symbol \"%c\" on line %d\n", 
+                       context.data[0], context.line_num);
+                free(source.data);
+                FREE_FUNC(Token, &token_array);
+                exit(0);
+        }
+        free(source.data);
+
+        // store into structure
+        init_structure(structure);
+        Retval populate_retval = populate_structure(structure, &token_array);
+        switch (populate_retval) {
+        case GOOD:
+                break;
+        case COORDINATE_MALFORM:
+                printf("Error: coordinate malform in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case EXPECTED_MACRO_ARG:
+                printf("Error: expected macro arg in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case MACRO_ARG_MALFORM:
+                printf("Error: macro arg malform in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case MEMORY_ERROR:
+                printf("Error: memory error in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case TRAIL_BRACE_MALFORM:
+                printf("Error: trail brace malform in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case UNKNOWN_MACRO:
+                printf("Error: unknown macro in populate_structure\n");
+                FREE_FUNC(Trail, &(structure->trails));
+                exit(0);
+        case UNKNOWN_SYMBOL: // not used in populate_structure
+                break;
+        }
+
+#ifdef DEBUG
+        print_tokens(token_array);
+#endif
+
+        FREE_FUNC(Token, &token_array);
 }

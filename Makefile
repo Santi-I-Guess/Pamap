@@ -1,21 +1,19 @@
 # pamap = pathway mapper
-TARGET    = pamap
-SRC_DIRS  = src src/parser
-SRC_FILES = $(foreach curr_dir, $(SRC_DIRS), $(wildcard ${curr_dir}/*.c))
-OBJ_FILES = $(patsubst %.c, build/%.o, $(notdir ${SRC_FILES}))
 
-CC = gcc
+.DEFAULT: normal
+.PHONY: normal clean debug depend
+
+TARGET          = pamap
+SRC_DIRS        = src src/parser
+SRC_FILES       = $(foreach curr_dir, $(SRC_DIRS), $(wildcard ${curr_dir}/*.c))
+OBJ_FILES       = $(patsubst %.c, build/%.o, $(notdir ${SRC_FILES}))
+OBJ_FILES_DEBUG = $(patsubst %.c, build/debug_%.o, $(notdir ${SRC_FILES}))
+
+CC        = gcc
 CC_FLAGS = -g -Wall -Wconversion -Wextra -Wpedantic
-LD_FLAGS = -g -lraylib
+LD_FLAGS = -g -lraylib -lm
 
-all: $(TARGET)
-
-$(TARGET): $(OBJ_FILES) | build
-	$(CC) -o $(TARGET) $(OBJ_FILES) $(LD_FLAGS)
-
-VPATH = $(SRC_DIRS)
-build/%.o: %.c | build
-	$(CC) -o $@ -c $< $(CC_FLAGS)
+normal: $(TARGET)
 
 build:
 	mkdir -p build
@@ -23,8 +21,19 @@ build:
 clean:
 	rm $(OBJ_FILES) $(TARGET) -f
 
-debug:
-	$(CC) -o $(TARGET) -DDEBUG $(SRC_FILES) $(CFLAGS) $(LD_FLAGS)
+debug: $(OBJ_FILES_DEBUG) | build
+	$(CC) -o $(TARGET) $^ $(LD_FLAGS)
+
+$(TARGET): $(OBJ_FILES) | build
+	$(CC) -o $(TARGET) $^ $(LD_FLAGS)
+
+VPATH = $(SRC_DIRS)
+# normal build
+build/%.o: %.c | build
+	$(CC) -o $@ -c $< $(CC_FLAGS)
+# with debug flag on
+build/debug_%.o: %.c | build
+	$(CC) -o $@ -c $< $(CC_FLAGS) -DDEBUG
 
 # also gets rid of weird ../ backtrack for deeper source files
 # is there a way to only have unique dependencies?
@@ -36,8 +45,6 @@ depend:
 	sed --in-place "s#\(/[a-z_]\+/../\)\+#/#g" sed_temp.txt
 	cat sed_temp.txt >> Makefile
 	rm sed_temp.txt -f
-
-.PHONY: all clean debug depend
 
 # DEPENDENCY FILES
 build/debug_funcs.o: src/debug_funcs.c src/debug_funcs.h src/generic_array.h \
