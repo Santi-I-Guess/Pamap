@@ -16,35 +16,39 @@ LD_FLAGS = -g -lraylib -lm
 normal: $(TARGET)
 
 build:
-	mkdir -p build
+	mkdir build
 
 clean:
-	rm $(OBJ_FILES) $(TARGET) -f
+	rm $(OBJ_FILES) $(OBJ_FILES_DEBUG) $(TARGET) -f
 
 debug: $(OBJ_FILES_DEBUG) | build
-	$(CC) -o $(TARGET) $^ $(LD_FLAGS)
+	@echo "building $@"
+	@$(CC) -o $(TARGET) $^ $(LD_FLAGS)
 
 $(TARGET): $(OBJ_FILES) | build
-	$(CC) -o $(TARGET) $^ $(LD_FLAGS)
+	@echo "building $@"
+	@$(CC) -o $(TARGET) $^ $(LD_FLAGS)
 
 VPATH = $(SRC_DIRS)
 # normal build
 build/%.o: %.c | build
-	$(CC) -o $@ -c $< $(CC_FLAGS)
+	@echo "building $@"
+	@$(CC) -o $@ -c $< $(CC_FLAGS)
 # with debug flag on
 build/%_debug.o: %.c | build
-	$(CC) -o $@ -c $< $(CC_FLAGS) -DDEBUG
+	@echo "building $@"
+	@$(CC) -o $@ -c $< $(CC_FLAGS) -DDEBUG
 
 # also gets rid of weird ../ backtrack for deeper source files
 # is there a way to only have unique dependencies?
 depend:
-	sed --in-place '/^# DEPENDENCY FILES$$/,$$d' Makefile
-	echo "# DEPENDENCY FILES"  >> Makefile
-	$(CC) -MM $(SRC_FILES) >> sed_temp.txt
-	sed --in-place 's#\(.*\):#build/\1:#' sed_temp.txt
-	sed --in-place "s#\(/[a-z_]\+/../\)\+#/#g" sed_temp.txt
-	cat sed_temp.txt >> Makefile
-	rm sed_temp.txt -f
+	@sed --in-place '/^# DEPENDENCY FILES$$/,$$d' Makefile
+	@echo "# DEPENDENCY FILES"  >> Makefile
+	@$(CC) -MM $(SRC_FILES) >> sed_temp.txt
+	@sed --in-place 's#\(.*\):#build/\1:#' sed_temp.txt
+	@sed --in-place "s#\(/[a-z_]\+/../\)\+#/#g" sed_temp.txt
+	@cat sed_temp.txt >> Makefile
+	@rm sed_temp.txt -f
 
 # DEPENDENCY FILES
 build/debug_funcs.o: src/debug_funcs.c src/includes/debug_funcs.h \
