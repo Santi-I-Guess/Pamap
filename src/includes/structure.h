@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 #include "generic_array.h"
-#include "parser/tokenizer.h"
+#include "tokenizer.h"
 
 typedef struct {
         int x, y, z;

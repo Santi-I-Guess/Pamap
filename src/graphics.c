@@ -2,8 +2,8 @@
 
 #include <raylib.h>
 
-#include "structure.h"
-#include "graphics.h"
+#include "includes/structure.h"
+#include "includes/graphics.h"
 
 #ifdef DEBUG
 #include <stdio.h>

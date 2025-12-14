@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../generic_array.h"
-#include "../structure.h"
-#include "parser.h"
+#include "includes/generic_array.h"
+#include "includes/structure.h"
+#include "includes/parser.h"
 
 #ifdef DEBUG
-#include "../debug_funcs.h"
+#include "includes/debug_funcs.h"
 #endif
 
 Retval handle_macro_token(

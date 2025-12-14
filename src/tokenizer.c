@@ -1,9 +1,9 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include "../generic_array.h"
-#include "../types.h"
-#include "tokenizer.h"
+#include "includes/generic_array.h"
+#include "includes/types.h"
+#include "includes/tokenizer.h"
 
 void store_input(FILE *source_file, Big_Str *source) {
         fseek(source_file, 0, SEEK_END);

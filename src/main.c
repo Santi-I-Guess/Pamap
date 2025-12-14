@@ -2,12 +2,12 @@
 
 #include <raylib.h>
 
-#include "graphics.h"
-#include "parser/parser.h"
-#include "structure.h"
+#include "includes/graphics.h"
+#include "includes/parser.h"
+#include "includes/structure.h"
 
 #ifdef DEBUG
-#include "debug_funcs.h"
+#include "includes/debug_funcs.h"
 #endif
 
 void generate_structure(Structure *structure, char **argv);

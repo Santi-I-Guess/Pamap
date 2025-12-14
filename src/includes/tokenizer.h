@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#include "../generic_array.h"
-#include "../types.h"
+#include "generic_array.h"
+#include "types.h"
 
 typedef struct {
         char data[64];

@@ -1,8 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H 1
 
-#include "../generic_array.h"
-#include "../structure.h"
+#include "generic_array.h"
+#include "structure.h"
 
 typedef struct {
         bool fill_states[52]; // (awaiting_first|awaiting_second)

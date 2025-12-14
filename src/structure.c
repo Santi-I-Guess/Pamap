@@ -1,4 +1,4 @@
-#include "structure.h"
+#include "includes/structure.h"
 
 DEFINE_FREE_FUNC(Coordinate)
 DEFINE_INIT_FUNC(Coordinate)

@@ -7,7 +7,7 @@ TARGET          = pamap
 SRC_DIRS        = src src/parser
 SRC_FILES       = $(foreach curr_dir, $(SRC_DIRS), $(wildcard ${curr_dir}/*.c))
 OBJ_FILES       = $(patsubst %.c, build/%.o, $(notdir ${SRC_FILES}))
-OBJ_FILES_DEBUG = $(patsubst %.c, build/debug_%.o, $(notdir ${SRC_FILES}))
+OBJ_FILES_DEBUG = $(patsubst %.c, build/%_debug.o, $(notdir ${SRC_FILES}))
 
 CC        = gcc
 CC_FLAGS = -g -Wall -Wconversion -Wextra -Wpedantic
@@ -32,7 +32,7 @@ VPATH = $(SRC_DIRS)
 build/%.o: %.c | build
 	$(CC) -o $@ -c $< $(CC_FLAGS)
 # with debug flag on
-build/debug_%.o: %.c | build
+build/%_debug.o: %.c | build
 	$(CC) -o $@ -c $< $(CC_FLAGS) -DDEBUG
 
 # also gets rid of weird ../ backtrack for deeper source files
@@ -47,25 +47,25 @@ depend:
 	rm sed_temp.txt -f
 
 # DEPENDENCY FILES
-build/debug_funcs.o: src/debug_funcs.c src/debug_funcs.h src/generic_array.h \
- src/structure.h src/parser/tokenizer.h src/generic_array.h \
- src/types.h src/generic_array.h src/types.h
-build/graphics.o: src/graphics.c src/structure.h src/generic_array.h \
- src/parser/tokenizer.h src/generic_array.h \
- src/types.h src/generic_array.h
-build/main.o: src/main.c src/graphics.h src/structure.h src/generic_array.h \
- src/parser/tokenizer.h src/generic_array.h \
- src/types.h src/generic_array.h src/parser/parser.h \
- src/structure.h
-build/structure.o: src/structure.c src/structure.h src/generic_array.h \
- src/parser/tokenizer.h src/generic_array.h \
- src/types.h src/generic_array.h
-build/types.o: src/types.c src/generic_array.h src/types.h
-build/parser.o: src/parser/parser.c src/generic_array.h \
- src/structure.h src/generic_array.h \
- src/parser/tokenizer.h src/parser/../generic_array.h \
- src/parser/../types.h src/parser/../generic_array.h \
- src/parser/parser.h
-build/tokenizer.o: src/parser/tokenizer.c src/generic_array.h \
- src/types.h src/generic_array.h \
- src/parser/tokenizer.h
+build/debug_funcs.o: src/debug_funcs.c src/includes/debug_funcs.h \
+ src/includes/generic_array.h src/includes/structure.h \
+ src/includes/tokenizer.h src/includes/types.h \
+ src/includes/generic_array.h src/includes/types.h
+build/graphics.o: src/graphics.c src/includes/structure.h \
+ src/includes/generic_array.h src/includes/tokenizer.h \
+ src/includes/types.h src/includes/graphics.h src/includes/structure.h
+build/main.o: src/main.c src/includes/graphics.h src/includes/structure.h \
+ src/includes/generic_array.h src/includes/tokenizer.h \
+ src/includes/types.h src/includes/parser.h src/includes/structure.h
+build/parser.o: src/parser.c src/includes/generic_array.h \
+ src/includes/structure.h src/includes/generic_array.h \
+ src/includes/tokenizer.h src/includes/types.h src/includes/parser.h \
+ src/includes/structure.h
+build/structure.o: src/structure.c src/includes/structure.h \
+ src/includes/generic_array.h src/includes/tokenizer.h \
+ src/includes/types.h
+build/tokenizer.o: src/tokenizer.c src/includes/generic_array.h \
+ src/includes/types.h src/includes/generic_array.h \
+ src/includes/tokenizer.h src/includes/types.h
+build/types.o: src/types.c src/includes/generic_array.h src/includes/types.h \
+ src/includes/generic_array.h

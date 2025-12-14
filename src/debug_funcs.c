@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "debug_funcs.h"
-#include "generic_array.h"
-#include "types.h"
+#include "includes/debug_funcs.h"
+#include "includes/generic_array.h"
+#include "includes/types.h"
 
 void print_coord(Coordinate coord) {
         printf("(%d, %d, %d)", coord.x, coord.y, coord.z);
