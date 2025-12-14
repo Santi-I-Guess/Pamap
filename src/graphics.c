@@ -114,40 +114,40 @@ void handle_controls(Camera3D *camera, Settings *settings) {
         }
 
         // handle lateral translation
+        float base_change_x = 0;
+        float base_change_z = 0;
+        float chosen_angle = theta;
         if (IsKeyDown(KEY_A)) {
                 // left
-                float new_angle = theta + PI/2.0f;
-                float base_change_x = -settings->move_speed * cosf(new_angle);
-                float base_change_z = -settings->move_speed * sinf(new_angle);
-                camera->position.x += base_change_x;
-                camera->position.z += base_change_z;
-                camera->target.x += base_change_x;
-                camera->target.z += base_change_z;
+                chosen_angle = theta + PI/2.0f;
+                base_change_x = -1;
+                base_change_z = -1;
         } else if (IsKeyDown(KEY_D)) {
                 // right
-                float new_angle = theta + PI/2.0f;
-                float base_change_x = settings->move_speed * cosf(new_angle);
-                float base_change_z = settings->move_speed * sinf(new_angle);
-                camera->position.x += base_change_x;
-                camera->position.z += base_change_z;
-                camera->target.x += base_change_x;
-                camera->target.z += base_change_z;
+                chosen_angle = theta + PI/2.0f;
+                base_change_x = 1;
+                base_change_z = 1;
         } else if (IsKeyDown(KEY_W)) {
                 // forwards
-                float base_change_x = settings->move_speed * cosf(theta);
-                float base_change_z = settings->move_speed * sinf(theta);
-                camera->position.x += base_change_x;
-                camera->position.z += base_change_z;
-                camera->target.x += base_change_x;
-                camera->target.z += base_change_z;
+                base_change_x = 1;
+                base_change_z = 1;
         } else if (IsKeyDown(KEY_S)) {
                 // backwards
-                float base_change_x = -settings->move_speed * cosf(theta);
-                float base_change_z = -settings->move_speed * sinf(theta);
-                camera->position.x += base_change_x;
-                camera->position.z += base_change_z;
-                camera->target.x += base_change_x;
-                camera->target.z += base_change_z;
+                base_change_x = -1;
+                base_change_z = -1;
+        }
+        base_change_x *= settings->move_speed * cosf(chosen_angle);
+        base_change_z *= settings->move_speed * sinf(chosen_angle);
+        camera->position.x += base_change_x;
+        camera->position.z += base_change_z;
+        camera->target.x   += base_change_x;
+        camera->target.z   += base_change_z;
+
+        float mouse_wheel = GetMouseWheelMove();
+        if (mouse_wheel > 0.1f) {
+                settings->move_speed *= 1.1f;
+        } else if (mouse_wheel < -0.1f) {
+                settings->move_speed *= 0.9f;
         }
 }
 
@@ -211,9 +211,10 @@ void draw_info_boxes(
 
         // draw camera position
 #ifndef DEBUG
-        DrawRectangle(            820, 10, 160, 30, Fade(RED, 0.5f));
-        DrawRectangleLines(       820, 10, 160, 30, BLUE);
-        DrawText(position_buffer, 830, 20,  10, DARKGRAY);
+        DrawRectangle(              820, 10, 160, 50, Fade(RED, 0.5f));
+        DrawRectangleLines(         820, 10, 160, 50, BLUE);
+        DrawText(position_buffer,   830, 20,  10, DARKGRAY);
+        DrawText(move_speed_buffer, 830, 40,  10, DARKGRAY);
 #else
         DrawRectangle(              820, 10, 160, 150, Fade(RED, 0.5f));
         DrawRectangleLines(         820, 10, 160, 150, BLUE);
