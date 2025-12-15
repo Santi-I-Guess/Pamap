@@ -52,6 +52,14 @@ Retval handle_macro_token(
                 structure->start_x = x;
                 structure->start_y = y;
                 structure->start_z = z;
+        } else if (strcmp(curr_token.data, "#start_view_pos") == 0) {
+                int x, y, z;
+                if (sscanf(next_token.data, "%d,%d,%d", &x, &y, &z) < 3) {
+                        return MACRO_ARG_MALFORM;
+                }
+                structure->start_view_x = x;
+                structure->start_view_y = y;
+                structure->start_view_z = z;
         } else if (strcmp(curr_token.data, "#teleport_pos") == 0) {
                 int x, y, z;
                 if (sscanf(next_token.data, "%d,%d,%d", &x, &y, &z) < 3) {

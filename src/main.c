@@ -27,12 +27,12 @@ int main(int argc, char **argv) {
         InitWindow(width, height, "Pathways Mapper");
         SetTargetFPS(60);
         Camera3D camera   = { 0 };
-        camera.position   = (Vector3){
-                (float)structure.start_x,
-                (float)structure.start_y,
-                (float)structure.start_z,
-        };
-        camera.target     = (Vector3){ 0.0f, 0.0f, 0.0f };
+        camera.position.x = (float)structure.start_x,
+        camera.position.y = (float)structure.start_y,
+        camera.position.z = (float)structure.start_z,
+        camera.target.x = (float)structure.start_view_x,
+        camera.target.y = (float)structure.start_view_y,
+        camera.target.z = (float)structure.start_view_z,
         camera.up         = (Vector3){ 0.0f, 1.0f, 0.0f };
         camera.fovy       = 45.0f;
         camera.projection = CAMERA_PERSPECTIVE;
@@ -50,7 +50,6 @@ int main(int argc, char **argv) {
         while (!WindowShouldClose()) {
                 UpdateCamera(&camera, CAMERA_CUSTOM);
 
-                handle_controls(&camera, &settings);
                 if (IsKeyPressed(KEY_Q)) {
                         if (settings.is_mouse_disabled)
                                 DisableCursor();
@@ -60,22 +59,25 @@ int main(int argc, char **argv) {
                 } else if (IsKeyPressed(KEY_R)) {
                         free_structure(&structure);
                         generate_structure(&structure, argv);
-                        camera.position   = (Vector3){
-                                (float)structure.start_x,
-                                (float)structure.start_y,
-                                (float)structure.start_z,
-                        };
+                        camera.position.x = (float)structure.start_x;
+                        camera.position.y = (float)structure.start_y;
+                        camera.position.z = (float)structure.start_z;
+                        camera.target.x = (float)structure.start_view_x;
+                        camera.target.y = (float)structure.start_view_y;
+                        camera.target.z = (float)structure.start_view_z;
                 } else if (IsKeyPressed(KEY_V)) {
-                        camera.position   = (Vector3){
-                                (float)structure.tele_x,
-                                (float)structure.tele_y,
-                                (float)structure.tele_z,
-                        };
+                        camera.position.x = (float)structure.tele_x;
+                        camera.position.y = (float)structure.tele_y;
+                        camera.position.z = (float)structure.tele_z;
+                        camera.target.x = (float)structure.start_view_x;
+                        camera.target.y = (float)structure.start_view_y;
+                        camera.target.z = (float)structure.start_view_z;
                 } else if (IsKeyPressed(KEY_Z)) {
                         // i need to set target in the direction of the
                         //      origin without changing the radius
                         camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
                 }
+                // handle_controls(&camera, &settings);
 
                 BeginDrawing();
                 ClearBackground(RAYWHITE);

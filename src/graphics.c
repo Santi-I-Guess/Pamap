@@ -96,18 +96,21 @@ void handle_controls(Camera3D *camera, Settings *settings) {
         // mouse_deltas.x /= md_mag;
         // mouse_deltas.y /= md_mag;
 
+        // change to ijkl?
+        float new_angle_theta = 0.0f;
+        float new_angle_phi = 0.0f;
         if (fabs(mouse_deltas.x) > 0.1f) {
-                float new_angle = theta + (0.01f * mouse_deltas.x);
-                float change_x = radius_xz * cosf(new_angle);
-                float change_z = radius_xz * sinf(new_angle);
+                float new_angle  = theta + (0.01f * mouse_deltas.x);
+                float change_x   = radius_xz * cosf(new_angle);
+                float change_z   = radius_xz * sinf(new_angle);
                 camera->target.x = change_x + camera->position.x;
                 camera->target.z = change_z + camera->position.z;
         } if (fabs(mouse_deltas.y) > 0.1f) {
                 float new_angle = phi + (0.01f * mouse_deltas.y);
                 new_angle = CLAMP(new_angle, 0.1f, 3.13f);
-                float change_x = radius * sinf(new_angle) * cosf(theta);
-                float change_z = radius * sinf(new_angle) * sinf(theta);
-                float change_y = radius * cosf(new_angle);
+                float change_x   = radius * sinf(new_angle) * cosf(theta);
+                float change_z   = radius * sinf(new_angle) * sinf(theta);
+                float change_y   = radius * cosf(new_angle);
                 camera->target.x = change_x + camera->position.x;
                 camera->target.y = change_y + camera->position.y;
                 camera->target.z = change_z + camera->position.z;
@@ -184,8 +187,8 @@ void draw_info_boxes(
                 + (diff_z * diff_z)
         );
         float radius_xz = sqrtf((diff_x * diff_x) + (diff_z * diff_z));
-        float theta  = atan2f(diff_z, diff_x);
-        float phi    = acosf(diff_y / radius);
+        float theta     = atan2f(diff_z, diff_x);
+        float phi       = acosf(diff_y / radius);
         char theta_buffer[64];
         char phi_buffer[64];
         char radius_buffer[64];
@@ -193,10 +196,10 @@ void draw_info_boxes(
         char move_speed_buffer[64];
 
         sprintf(theta_buffer,      "Current theta: %.1f r", theta);
-        sprintf(phi_buffer,        "Current phi: %.1f r", phi);
-        sprintf(radius_buffer,     "Current radius: %.1f", radius);
-        sprintf(xz_radius_buffer,  "Current xz-rad: %.1f", radius_xz);
-        sprintf(move_speed_buffer, "Current speed: %.2f", settings->move_speed);
+        sprintf(phi_buffer,        "Current phi: %.1f r",   phi);
+        sprintf(radius_buffer,     "Current radius: %.1f",  radius);
+        sprintf(xz_radius_buffer,  "Current xz-rad: %.1f",  radius_xz);
+        sprintf(move_speed_buffer, "Current speed: %.2f",   settings->move_speed);
 
         // draw controls
         DrawRectangle( 10, 10, 300, 150, Fade(SKYBLUE, 0.5f));
@@ -211,13 +214,15 @@ void draw_info_boxes(
 
         // draw camera position
 #ifndef DEBUG
-        DrawRectangle(              820, 10, 160, 50, Fade(RED, 0.5f));
-        DrawRectangleLines(         820, 10, 160, 50, BLUE);
+        int num_vars = 2;
+        DrawRectangle(              820, 10, 160, 10+(20*num_vars), Fade(RED, 0.5f));
+        DrawRectangleLines(         820, 10, 160, 10+(20*num_vars), BLUE);
         DrawText(position_buffer,   830, 20,  10, DARKGRAY);
         DrawText(move_speed_buffer, 830, 40,  10, DARKGRAY);
 #else
-        DrawRectangle(              820, 10, 160, 150, Fade(RED, 0.5f));
-        DrawRectangleLines(         820, 10, 160, 150, BLUE);
+        int num_vars = 7;
+        DrawRectangle(              820, 10, 160, 10+(20*num_vars), Fade(RED, 0.5f));
+        DrawRectangleLines(         820, 10, 160, 10+(20*num_vars), BLUE);
         DrawText(position_buffer,   830, 20,  10, DARKGRAY);
         DrawText(target_buffer,     830, 40,  10, DARKGRAY);
         DrawText(theta_buffer,      830, 60,  10, DARKGRAY);
