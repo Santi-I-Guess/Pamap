@@ -89,18 +89,18 @@ void handle_controls(Camera3D *camera, Settings *settings) {
         // handle camera rotation
         // even w/o movement, mouse deltas spike at beginning of program
         Vector2 mouse_deltas = GetMouseDelta();
+        float new_theta      = theta + (0.01f * mouse_deltas.x);
+        float new_phi        = phi   + (0.01f * mouse_deltas.y);
+        new_phi = CLAMP(new_phi, 0.1f, 3.13f);
         if (fabs(mouse_deltas.x) > 0.1f) {
-                float new_angle  = theta + (0.01f * mouse_deltas.x);
-                float change_x   = radius_xz * cosf(new_angle);
-                float change_z   = radius_xz * sinf(new_angle);
+                float change_x   = radius_xz * cosf(new_theta);
+                float change_z   = radius_xz * sinf(new_theta);
                 camera->target.x = change_x + camera->position.x;
                 camera->target.z = change_z + camera->position.z;
         } if (fabs(mouse_deltas.y) > 0.1f) {
-                float new_angle = phi + (0.01f * mouse_deltas.y);
-                new_angle = CLAMP(new_angle, 0.1f, 3.13f);
-                float change_x   = radius * sinf(new_angle) * cosf(theta);
-                float change_z   = radius * sinf(new_angle) * sinf(theta);
-                float change_y   = radius * cosf(new_angle);
+                float change_x   = radius * sinf(new_phi) * cosf(new_theta);
+                float change_z   = radius * sinf(new_phi) * sinf(new_theta);
+                float change_y   = radius * cosf(new_phi);
                 camera->target.x = change_x + camera->position.x;
                 camera->target.y = change_y + camera->position.y;
                 camera->target.z = change_z + camera->position.z;
