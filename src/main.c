@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 
 #include <raylib.h>
@@ -10,7 +11,11 @@
 #include "includes/debug_funcs.h"
 #endif
 
-void generate_structure(Structure *structure, char **argv);
+void generate_structure(Structure *structure, Settings *settings, char **argv);
+
+void custom_log(int msgType, const char *text, va_list args) {
+        return;
+}
 
 int main(int argc, char **argv) {
         if (argc != 2) {
@@ -20,29 +25,27 @@ int main(int argc, char **argv) {
 
         // tokenize, parse, and populate data into structure
         Structure structure = {0};
-        generate_structure(&structure, argv);
+        Settings settings = {0};
+        settings.is_mouse_disabled = true;
+        settings.move_speed = 0.5f;
+        generate_structure(&structure, &settings, argv);
+
+        SetTraceLogCallback(custom_log);
 
         const int width = 1000;
         const int height = 600;
         InitWindow(width, height, "Pathways Mapper");
         SetTargetFPS(60);
         Camera3D camera   = { 0 };
-        camera.position.x = (float)structure.start_x,
-        camera.position.y = (float)structure.start_y,
-        camera.position.z = (float)structure.start_z,
-        camera.target.x = (float)structure.start_view_x,
-        camera.target.y = (float)structure.start_view_y,
-        camera.target.z = (float)structure.start_view_z,
+        camera.position.x = (float)settings.start_x,
+        camera.position.y = (float)settings.start_y,
+        camera.position.z = (float)settings.start_z,
+        camera.target.x   = (float)settings.start_view_x,
+        camera.target.y   = (float)settings.start_view_y,
+        camera.target.z   = (float)settings.start_view_z,
         camera.up         = (Vector3){ 0.0f, 1.0f, 0.0f };
         camera.fovy       = 45.0f;
         camera.projection = CAMERA_PERSPECTIVE;
-
-        Settings settings = {
-                .is_mouse_disabled = true,
-                .move_speed = .5f,
-                .movement = {0},
-                .rotation = {0},
-        };
 
         DisableCursor();
         SetExitKey(KEY_NULL);
@@ -58,27 +61,30 @@ int main(int argc, char **argv) {
                         settings.is_mouse_disabled ^= true;
                 } else if (IsKeyPressed(KEY_R)) {
                         free_structure(&structure);
-                        generate_structure(&structure, argv);
-                        camera.position.x = (float)structure.start_x;
-                        camera.position.y = (float)structure.start_y;
-                        camera.position.z = (float)structure.start_z;
-                        camera.target.x = (float)structure.start_view_x;
-                        camera.target.y = (float)structure.start_view_y;
-                        camera.target.z = (float)structure.start_view_z;
+                        generate_structure(&structure, &settings, argv);
+                        camera.position.x = (float)settings.start_x;
+                        camera.position.y = (float)settings.start_y;
+                        camera.position.z = (float)settings.start_z;
+                        camera.target.x = (float)settings.start_view_x;
+                        camera.target.y = (float)settings.start_view_y;
+                        camera.target.z = (float)settings.start_view_z;
                 } else if (IsKeyPressed(KEY_V)) {
-                        camera.position.x = (float)structure.tele_x;
-                        camera.position.y = (float)structure.tele_y;
-                        camera.position.z = (float)structure.tele_z;
-                        camera.target.x = (float)structure.start_view_x;
-                        camera.target.y = (float)structure.start_view_y;
-                        camera.target.z = (float)structure.start_view_z;
+                        camera.position.x = (float)settings.tele_x;
+                        camera.position.y = (float)settings.tele_y;
+                        camera.position.z = (float)settings.tele_z;
+                        camera.target.x = (float)settings.start_view_x;
+                        camera.target.y = (float)settings.start_view_y;
+                        camera.target.z = (float)settings.start_view_z;
                 } else if (IsKeyPressed(KEY_Z)) {
                         // i need to set target in the direction of the
                         //      origin without changing the radius
                         camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
                 }
-                // handle_controls(&camera, &settings);
-
+                handle_controls(&camera, &settings);
+#ifdef DEBUG
+                Vector2 mouse_d = GetMouseDelta();
+                printf("%.1f, %.1f\n", mouse_d.x, mouse_d.y);
+#endif
                 BeginDrawing();
                 ClearBackground(RAYWHITE);
                 BeginMode3D(camera);
@@ -105,7 +111,7 @@ int main(int argc, char **argv) {
 
                 EndMode3D();
                 // controls box and position / angle box
-                draw_info_boxes(&camera, &structure, &settings);
+                draw_info_boxes(&camera, &settings);
                 EndDrawing();
         }
 
@@ -115,7 +121,17 @@ int main(int argc, char **argv) {
         return 0;
 }
 
-void generate_structure(Structure *structure, char **argv) {
+void generate_structure(Structure *structure, Settings *settings, char **argv) {
+        settings->start_x = 10;
+        settings->start_y = 10;
+        settings->start_z = 10;
+        settings->start_view_x = 0;
+        settings->start_view_y = 0;
+        settings->start_view_z = 0;
+        settings->tele_x = 10;
+        settings->tele_y = 10;
+        settings->tele_z = 10;
+
         // store file in string
         FILE *source_file = fopen(argv[1], "r");
         if (!source_file) {
@@ -158,7 +174,11 @@ void generate_structure(Structure *structure, char **argv) {
 
         // store into structure
         init_structure(structure);
-        Retval populate_retval = populate_structure(structure, &token_array);
+        Retval populate_retval = populate_structure(
+                structure,
+                settings,
+                &token_array
+        );
         switch (populate_retval) {
         case GOOD:
                 break;
@@ -189,10 +209,6 @@ void generate_structure(Structure *structure, char **argv) {
         case UNKNOWN_SYMBOL: // not used in populate_structure
                 break;
         }
-
-#ifdef DEBUG
-        print_tokens(token_array);
-#endif
 
         FREE_FUNC(Token, &token_array);
 }

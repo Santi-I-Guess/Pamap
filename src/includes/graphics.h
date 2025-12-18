@@ -8,8 +8,15 @@
 typedef struct {
         bool is_mouse_disabled;
         float move_speed;
-        Vector3 movement;
-        Vector3 rotation;
+        int start_x;
+        int start_y;
+        int start_z;
+        int start_view_x;
+        int start_view_y;
+        int start_view_z;
+        int tele_x;
+        int tele_y;
+        int tele_z;
 } Settings;
 
 void draw_edge(Coordinate first, Coordinate second, Color color);
@@ -21,7 +28,6 @@ void handle_controls(Camera3D *camera, Settings *settings);
 // draw controls box and postion / angle box
 void draw_info_boxes(
         Camera3D *camera,
-        Structure *structure,
         Settings *settings
 );
 

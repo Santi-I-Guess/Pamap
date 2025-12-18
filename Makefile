@@ -1,7 +1,7 @@
 # pamap = pathway mapper
 
 .DEFAULT: normal
-.PHONY: normal clean debug depend
+.PHONY:   normal clean debug depend
 
 TARGET          = pamap
 SRC_DIRS        = src src/parser
@@ -9,7 +9,7 @@ SRC_FILES       = $(foreach curr_dir, $(SRC_DIRS), $(wildcard ${curr_dir}/*.c))
 OBJ_FILES       = $(patsubst %.c, build/%.o, $(notdir ${SRC_FILES}))
 OBJ_FILES_DEBUG = $(patsubst %.c, build/%_debug.o, $(notdir ${SRC_FILES}))
 
-CC        = gcc
+CC       = gcc
 CC_FLAGS = -g -Wall -Wconversion -Wextra -Wpedantic
 LD_FLAGS = -g -lraylib -lm
 
@@ -23,7 +23,7 @@ clean:
 
 debug: $(OBJ_FILES_DEBUG) | build
 	@echo "building $@"
-	@$(CC) -o $(TARGET) $^ $(LD_FLAGS)
+	@$(CC) -o $(TARGET) $^ $(LD_FLAGS) -fsanitize=address
 
 $(TARGET): $(OBJ_FILES) | build
 	@echo "building $@"

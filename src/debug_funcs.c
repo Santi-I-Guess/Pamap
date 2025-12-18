@@ -2,7 +2,6 @@
 
 #include "includes/debug_funcs.h"
 #include "includes/generic_array.h"
-#include "includes/types.h"
 
 void print_coord(Coordinate coord) {
         printf("(%d, %d, %d)", coord.x, coord.y, coord.z);
@@ -23,10 +22,10 @@ void print_structure(Structure *alpha) {
                 Trail curr_trail = alpha->trails.data[i];
                 for (size_t j = 0; j < curr_trail.count; j++) {
                         Coordinate curr_coord = curr_trail.data[j];
-                        printf("-> (%d, %d, %d)\n", curr_coord.x, curr_coord.y, curr_coord.z);
+                        printf("-> (%d, %d, %d)\n",
+                               curr_coord.x, curr_coord.y, curr_coord.z);
                 }
         }
-        printf("Start pos: (%d, %d, %d)\n", alpha->start_x, alpha->start_y, alpha->start_z);
 }
 
 void print_tokens(ARRAY_NAME(Token) token_array)  {

@@ -39,10 +39,6 @@ typedef struct {
         ARRAY_NAME(Trail) trails; // 2d array of coordinates
         size_t edge_count;
         Edge edges[52];
-        bool unique_start_view;
-        int start_x, start_y, start_z;
-        int start_view_x, start_view_y, start_view_z;
-        int tele_x, tele_y, tele_z;
 } Structure;
 
 bool init_structure(Structure *alpha);

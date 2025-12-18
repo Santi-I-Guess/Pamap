@@ -9,15 +9,6 @@ DEFINE_INIT_FUNC(Trail)
 DEFINE_APPEND_FUNC(Trail)
 
 bool init_structure(Structure *alpha) {
-        alpha->start_x = 10;
-        alpha->start_y = 10;
-        alpha->start_z = 10;
-        alpha->start_view_x = 0;
-        alpha->start_view_y = 0;
-        alpha->start_view_z = 0;
-        alpha->tele_x = 10;
-        alpha->tele_y = 10;
-        alpha->tele_z = 10;
         return INIT_FUNC(Trail, &alpha->trails, 8);
 }
 

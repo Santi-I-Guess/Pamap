@@ -3,8 +3,9 @@
 #include <string.h>
 
 #include "includes/generic_array.h"
-#include "includes/structure.h"
+#include "includes/graphics.h"
 #include "includes/parser.h"
+#include "includes/structure.h"
 
 #ifdef DEBUG
 #include "includes/debug_funcs.h"
@@ -12,6 +13,7 @@
 
 Retval handle_macro_token(
         Structure *structure,
+        Settings *settings,
         const Token curr_token,
         const Token next_token
 ) {
@@ -49,25 +51,25 @@ Retval handle_macro_token(
                 if (sscanf(next_token.data, "%d,%d,%d", &x, &y, &z) < 3) {
                         return MACRO_ARG_MALFORM;
                 }
-                structure->start_x = x;
-                structure->start_y = y;
-                structure->start_z = z;
+                settings->start_x = x;
+                settings->start_y = y;
+                settings->start_z = z;
         } else if (strcmp(curr_token.data, "#start_view_pos") == 0) {
                 int x, y, z;
                 if (sscanf(next_token.data, "%d,%d,%d", &x, &y, &z) < 3) {
                         return MACRO_ARG_MALFORM;
                 }
-                structure->start_view_x = x;
-                structure->start_view_y = y;
-                structure->start_view_z = z;
+                settings->start_view_x = x;
+                settings->start_view_y = y;
+                settings->start_view_z = z;
         } else if (strcmp(curr_token.data, "#teleport_pos") == 0) {
                 int x, y, z;
                 if (sscanf(next_token.data, "%d,%d,%d", &x, &y, &z) < 3) {
                         return MACRO_ARG_MALFORM;
                 }
-                structure->tele_x = x;
-                structure->tele_y = y;
-                structure->tele_z = z;
+                settings->tele_x = x;
+                settings->tele_y = y;
+                settings->tele_z = z;
 
         } else {
                 return UNKNOWN_MACRO;
@@ -139,6 +141,7 @@ Retval handle_normal_token(
 
 Retval populate_structure(
         Structure *structure,
+        Settings *settings,
         const ARRAY_NAME(Token) *token_array
 ) {
         Edge_Stacks state = {0};
@@ -170,6 +173,7 @@ Retval populate_structure(
                         next_token = token_array->data[token_idx + 1];
                         token_res = handle_macro_token(
                                 structure,
+                                settings,
                                 curr_token,
                                 next_token
                         );

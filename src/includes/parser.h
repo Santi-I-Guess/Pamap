@@ -2,6 +2,7 @@
 #define PARSER_H 1
 
 #include "generic_array.h"
+#include "graphics.h"
 #include "structure.h"
 
 typedef struct {
@@ -12,6 +13,7 @@ typedef struct {
 
 Retval handle_macro_token(
         Structure *structure,
+        Settings *settings,
         const Token curr_token,
         const Token next_token
 );
@@ -26,6 +28,7 @@ Retval handle_normal_token(
 // populate Structure struct from tokens
 Retval populate_structure(
         Structure *structure,
+        Settings *settings,
         const ARRAY_NAME(Token) *tokens
 );
 

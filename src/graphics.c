@@ -87,18 +87,9 @@ void handle_controls(Camera3D *camera, Settings *settings) {
         }
 
         // handle camera rotation
-        // normalize mouse vector
+        // even w/o movement, mouse deltas spike at beginning of program
+        /*
         Vector2 mouse_deltas = GetMouseDelta();
-        // float md_mag = sqrtf(
-        //        (mouse_deltas.x * mouse_deltas.x)
-        //        + (mouse_deltas.y * mouse_deltas.y)
-        // );
-        // mouse_deltas.x /= md_mag;
-        // mouse_deltas.y /= md_mag;
-
-        // change to ijkl?
-        float new_angle_theta = 0.0f;
-        float new_angle_phi = 0.0f;
         if (fabs(mouse_deltas.x) > 0.1f) {
                 float new_angle  = theta + (0.01f * mouse_deltas.x);
                 float change_x   = radius_xz * cosf(new_angle);
@@ -115,37 +106,59 @@ void handle_controls(Camera3D *camera, Settings *settings) {
                 camera->target.y = change_y + camera->position.y;
                 camera->target.z = change_z + camera->position.z;
         }
+        */
 
+        /*
         // handle lateral translation
         float base_change_x = 0;
         float base_change_z = 0;
         float chosen_angle = theta;
         if (IsKeyDown(KEY_A)) {
                 // left
-                chosen_angle = theta + PI/2.0f;
-                base_change_x = -1;
-                base_change_z = -1;
+                chosen_angle   = theta + PI/2.0f;
+                base_change_x  = -1;
+                base_change_z  = -1;
+                base_change_x *= settings->move_speed * cosf(chosen_angle);
+                base_change_z *= settings->move_speed * sinf(chosen_angle);
+                camera->position.x += base_change_x;
+                camera->position.z += base_change_z;
+                camera->target.x   += base_change_x;
+                camera->target.z   += base_change_z;
         } else if (IsKeyDown(KEY_D)) {
                 // right
-                chosen_angle = theta + PI/2.0f;
-                base_change_x = 1;
-                base_change_z = 1;
+                chosen_angle   = theta + PI/2.0f;
+                base_change_x  = 1;
+                base_change_z  = 1;
+                base_change_x *= settings->move_speed * cosf(chosen_angle);
+                base_change_z *= settings->move_speed * sinf(chosen_angle);
+                camera->position.x += base_change_x;
+                camera->position.z += base_change_z;
+                camera->target.x   += base_change_x;
+                camera->target.z   += base_change_z;
         } else if (IsKeyDown(KEY_W)) {
                 // forwards
-                base_change_x = 1;
-                base_change_z = 1;
+                base_change_x  = 1;
+                base_change_z  = 1;
+                base_change_x *= settings->move_speed * cosf(chosen_angle);
+                base_change_z *= settings->move_speed * sinf(chosen_angle);
+                camera->position.x += base_change_x;
+                camera->position.z += base_change_z;
+                camera->target.x   += base_change_x;
+                camera->target.z   += base_change_z;
         } else if (IsKeyDown(KEY_S)) {
                 // backwards
-                base_change_x = -1;
-                base_change_z = -1;
+                base_change_x  = -1;
+                base_change_z  = -1;
+                base_change_x *= settings->move_speed * cosf(chosen_angle);
+                base_change_z *= settings->move_speed * sinf(chosen_angle);
+                camera->position.x += base_change_x;
+                camera->position.z += base_change_z;
+                camera->target.x   += base_change_x;
+                camera->target.z   += base_change_z;
         }
-        base_change_x *= settings->move_speed * cosf(chosen_angle);
-        base_change_z *= settings->move_speed * sinf(chosen_angle);
-        camera->position.x += base_change_x;
-        camera->position.z += base_change_z;
-        camera->target.x   += base_change_x;
-        camera->target.z   += base_change_z;
+        */
 
+        // handle speed
         float mouse_wheel = GetMouseWheelMove();
         if (mouse_wheel > 0.1f) {
                 settings->move_speed *= 1.1f;
@@ -156,16 +169,15 @@ void handle_controls(Camera3D *camera, Settings *settings) {
 
 void draw_info_boxes(
         Camera3D *camera,
-        Structure *structure,
         Settings *settings
 ) {
         char teleport_buffer[64];
         char position_buffer[64];
         char target_buffer[64];
         sprintf(teleport_buffer, "- V to teleport to (%d, %d, %d)",
-                structure->tele_x,
-                structure->tele_y,
-                structure->tele_z
+                settings->tele_x,
+                settings->tele_y,
+                settings->tele_z
         );
         sprintf(position_buffer, "Current pos: (%.0f, %.0f, %.0f)",
                 camera->position.x,
@@ -195,13 +207,14 @@ void draw_info_boxes(
         char xz_radius_buffer[64];
         char move_speed_buffer[64];
 
+        // write position info to buffers
         sprintf(theta_buffer,      "Current theta: %.1f r", theta);
         sprintf(phi_buffer,        "Current phi: %.1f r",   phi);
         sprintf(radius_buffer,     "Current radius: %.1f",  radius);
         sprintf(xz_radius_buffer,  "Current xz-rad: %.1f",  radius_xz);
         sprintf(move_speed_buffer, "Current speed: %.2f",   settings->move_speed);
 
-        // draw controls
+        // draw controls info
         DrawRectangle( 10, 10, 300, 150, Fade(SKYBLUE, 0.5f));
         DrawRectangleLines( 10, 10, 300, 150, BLUE);
         DrawText("Free camera default controls:", 20,  20, 10, BLACK);
@@ -212,7 +225,7 @@ void draw_info_boxes(
         DrawText(teleport_buffer,                 40, 120, 10, DARKGRAY);
         DrawText("- Z to zoom to (0, 0, 0)",      40, 140, 10, DARKGRAY);
 
-        // draw camera position
+        // draw camera position info
 #ifndef DEBUG
         int num_vars = 2;
         DrawRectangle(              820, 10, 160, 10+(20*num_vars), Fade(RED, 0.5f));
