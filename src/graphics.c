@@ -88,7 +88,6 @@ void handle_controls(Camera3D *camera, Settings *settings) {
 
         // handle camera rotation
         // even w/o movement, mouse deltas spike at beginning of program
-        /*
         Vector2 mouse_deltas = GetMouseDelta();
         if (fabs(mouse_deltas.x) > 0.1f) {
                 float new_angle  = theta + (0.01f * mouse_deltas.x);
@@ -106,9 +105,7 @@ void handle_controls(Camera3D *camera, Settings *settings) {
                 camera->target.y = change_y + camera->position.y;
                 camera->target.z = change_z + camera->position.z;
         }
-        */
 
-        /*
         // handle lateral translation
         float base_change_x = 0;
         float base_change_z = 0;
@@ -156,7 +153,6 @@ void handle_controls(Camera3D *camera, Settings *settings) {
                 camera->target.x   += base_change_x;
                 camera->target.z   += base_change_z;
         }
-        */
 
         // handle speed
         float mouse_wheel = GetMouseWheelMove();
