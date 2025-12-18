@@ -31,7 +31,7 @@ typedef struct { \
         size_t count; \
         size_t capacity; \
         type *data; \
-} type##_Array;
+} type##_Array
 
 #define DEFINE_FREE_FUNC(type) \
 void free_array_##type(type##_Array *alpha) { \

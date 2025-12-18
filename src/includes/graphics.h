@@ -1,13 +1,17 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H 1
 
+#include <stdbool.h>
+#include <stdio.h>
 #include <raylib.h>
 
 #include "structure.h"
 
 typedef struct {
         bool is_mouse_disabled;
+        bool is_testing;
         float move_speed;
+        FILE *source_file;
         int start_x;
         int start_y;
         int start_z;

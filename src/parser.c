@@ -82,13 +82,6 @@ Retval handle_normal_token(
         Edge_Stacks *state,
         const Token token
 ) {
-        // auxiliary vars
-        bool (*p_fill_states)[52]     = &state->fill_states;
-        bool (*p_pending_indices)[52] = &state->pending_indices;
-        Coordinate (*p_data)[52][2]   = &state->data;
-        size_t *p_edge_count = &structure->edge_count;
-        Edge (*p_edges)[52]  = &structure->edges;
-
         if (token.data[0] == '[') {
                 // start a new trail
                 if (!alloc_trail_structure(structure))
@@ -109,21 +102,22 @@ Retval handle_normal_token(
 
                 // if any pending edges, add coord data to edge
                 for (int i = 0; i < 52; i++) {
-                        if (!(*p_pending_indices[i]))
+                        if (!(state->pending_indices[i]))
                                 continue;
-                        if (*p_fill_states[i] == false) {
-                                *p_data[i][0] = curr_coord;
-                                *p_fill_states[i] = true;
+                        if (state->fill_states[i] == false) {
+                                state->data[i][0] = curr_coord;
+                                state->fill_states[i] = true;
                         } else {
-                                *p_data[i][1] = curr_coord;
-                                *p_fill_states[i] = false;
+                                state->data[i][1] = curr_coord;
+                                state->fill_states[i] = false;
                                 Edge next_edge;
-                                next_edge.first = *p_data[i][0];
-                                next_edge.second = *p_data[i][1];
+                                next_edge.first = state->data[i][0];
+                                next_edge.second = state->data[i][1];
                                 next_edge.symbol = get_idx_char(i);
                                 // push edge to struct
-                                *p_edges[*p_edge_count] = next_edge;
-                                (*p_edge_count)++;
+                                size_t e_count = structure->edge_count;
+                                structure->edges[e_count] = next_edge;
+                                (structure->edge_count)++;
                         }
                 }
 

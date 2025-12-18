@@ -8,6 +8,9 @@
 #include "generic_array.h"
 #include "tokenizer.h"
 
+// 64 coords per trail
+// dynamic number of trails
+
 typedef struct {
         int x, y, z;
 } Coordinate;
@@ -18,7 +21,7 @@ typedef struct {
         char symbol;
 } Edge;
 
-DEFINE_ARRAY_STRUCT(Coordinate)
+DEFINE_ARRAY_STRUCT(Coordinate);
 DECLARE_FREE_FUNC(Coordinate);
 DECLARE_INIT_FUNC(Coordinate);
 DECLARE_APPEND_FUNC(Coordinate);
@@ -30,7 +33,7 @@ typedef struct {
         uint8_t edge_red, edge_green, edge_blue;
 } Trail;
 
-DEFINE_ARRAY_STRUCT(Trail)
+DEFINE_ARRAY_STRUCT(Trail);
 DECLARE_FREE_FUNC(Trail);
 DECLARE_INIT_FUNC(Trail);
 DECLARE_APPEND_FUNC(Trail);

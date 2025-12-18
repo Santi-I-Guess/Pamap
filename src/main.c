@@ -3,23 +3,25 @@
 
 #include <raylib.h>
 
+#include "includes/debug_funcs.h"
 #include "includes/graphics.h"
 #include "includes/parser.h"
 #include "includes/structure.h"
 
-#ifdef DEBUG
-#include "includes/debug_funcs.h"
-#endif
+#define UNUSED(x) (void)x
 
-void generate_structure(Structure *structure, Settings *settings, char **argv);
+void generate_structure(Structure *structure, Settings *settings);
 
-void custom_log(int msgType, const char *text, va_list args) {
+void custom_log(int msg_type, const char *text, va_list args) {
+        UNUSED(msg_type);
+        UNUSED(text);
+        UNUSED(args);
         return;
 }
 
 int main(int argc, char **argv) {
-        if (argc != 2) {
-                printf("usage: pathways <input_file>\n");
+        if (argc < 2) {
+                printf("usage: pathways <input_file> [-t]\n");
                 return 0;
         }
 
@@ -28,7 +30,32 @@ int main(int argc, char **argv) {
         Settings settings = {0};
         settings.is_mouse_disabled = true;
         settings.move_speed = 0.5f;
-        generate_structure(&structure, &settings, argv);
+
+        char filename[128] = "";
+        for (int i = 1; i < argc; ++i) {
+                if (strcmp(argv[i], "-t") == 0)
+                        settings.is_testing = true;
+                else if (strlen(filename) == 0)
+                        strcpy(filename, argv[i]);
+        }
+        if (strlen(filename) == 0) {
+                printf("failed to provide a filename\n");
+                return 0;
+        }
+        settings.source_file = fopen(filename, "r");
+        if (settings.source_file == NULL) {
+                fprintf(stderr, "failed to open file\n");
+                return 1;
+        }
+
+        generate_structure(&structure, &settings);
+
+        if (settings.is_testing) {
+                print_structure(&structure);
+                print_settings(&settings);
+                free_structure(&structure);
+                return 0;
+        }
 
         SetTraceLogCallback(custom_log);
 
@@ -61,7 +88,7 @@ int main(int argc, char **argv) {
                         settings.is_mouse_disabled ^= true;
                 } else if (IsKeyPressed(KEY_R)) {
                         free_structure(&structure);
-                        generate_structure(&structure, &settings, argv);
+                        generate_structure(&structure, &settings);
                         camera.position.x = (float)settings.start_x;
                         camera.position.y = (float)settings.start_y;
                         camera.position.z = (float)settings.start_z;
@@ -121,7 +148,7 @@ int main(int argc, char **argv) {
         return 0;
 }
 
-void generate_structure(Structure *structure, Settings *settings, char **argv) {
+void generate_structure(Structure *structure, Settings *settings) {
         settings->start_x = 10;
         settings->start_y = 10;
         settings->start_z = 10;
@@ -133,14 +160,10 @@ void generate_structure(Structure *structure, Settings *settings, char **argv) {
         settings->tele_z = 10;
 
         // store file in string
-        FILE *source_file = fopen(argv[1], "r");
-        if (!source_file) {
-                fprintf(stderr, "failed to open file\n");
-                exit(1);
-        }
         Big_Str source = { 0 };
-        store_input(source_file, &source);
-        fclose(source_file);
+        store_input(settings->source_file, &source);
+        fclose(settings->source_file);
+        settings->source_file = NULL;
 
         ARRAY_NAME(Token) token_array = {0};
         if (!INIT_FUNC(Token, &token_array, 128)) {
